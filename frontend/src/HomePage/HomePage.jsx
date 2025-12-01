@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import './HomePage.css'
+import CreateLog from '../CreateLog/CreateLog';
 
 export default function HomePage() {
 
@@ -14,6 +15,8 @@ export default function HomePage() {
                     <PanelResizeHandle />
                     <Panel defaultSize={30} className="panel">
                         <h1>New Log</h1>
+                        <CreateLog />
+
 
                     </Panel>
                 </PanelGroup>
