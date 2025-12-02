@@ -3,6 +3,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import './HomePage.css'
 import CreateLog from '../CreateLog/CreateLog';
 
+
 export default function HomePage() {
 
     return (
@@ -10,20 +11,24 @@ export default function HomePage() {
             <Panel defaultSize={50}>
                 <PanelGroup direction="horizontal">
                     <Panel defaultSize={70} className="panel">
-                        <h1>Chart</h1>
+                        <div className="panel-container">
+                            <h1>Chart</h1>
+                        </div>
                     </Panel>
                     <PanelResizeHandle />
                     <Panel defaultSize={30} className="panel">
-                        <h1>New Log</h1>
-                        <CreateLog />
-
-
+                        <div className="panel-container">
+                            <h1>New Log</h1>
+                            <CreateLog />
+                        </div>
                     </Panel>
                 </PanelGroup>
             </Panel>
             <PanelResizeHandle />
             <Panel defaultSize={50} className="panel">
-                <h1>Logs</h1>
+                <div className="panel-container">
+                    <h1>Logs</h1>
+                </div>
             </Panel>
 
         </PanelGroup>
