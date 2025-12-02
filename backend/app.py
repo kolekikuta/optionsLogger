@@ -2,41 +2,42 @@ from flask import Flask
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
-from models import db
-from flask_sqlalchemy import SQLAlchemy
+import datetime
+
+from database import db
+from ticker import download_ticker
+from routes.positions_routes import positions_blueprint
+from routes.users_routes import users_blueprint
+from routes.ticker_history_routes import ticker_history_blueprint
 
 
-app = Flask(__name__)
-CORS(app)
 
-load_dotenv()
 
-db = SQLAlchemy()
+
+
 
 def create_app():
     app = Flask(__name__)
+    load_dotenv()
+    DATABASE_URI = os.getenv("DATABASE_URI")
+    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
 
-    USER = os.getenv("user")
-    PASSWORD = os.getenv("password")
-    HOST = os.getenv("host")
-    PORT = os.getenv("port")
-    DBNAME = os.getenv("dbname")
-
-    DATABASE_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
-
-    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
+    CORS(app)
     db.init_app(app)
 
-    with app.app_context():
-        try:
-            db.session.execute("SELECT 1")
-            print("Connection successful!")
-        except Exception as e:
-            print("Failed to connect:", e)
+    app.register_blueprint(positions_blueprint, url_prefix="/api")
+    app.register_blueprint(users_blueprint, url_prefix="/api")
+    app.register_blueprint(ticker_history_blueprint, url_prefix="/api")
+
 
     return app
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     app = create_app()

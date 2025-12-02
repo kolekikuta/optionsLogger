@@ -1,19 +1,55 @@
 import { useState } from 'react';
+import axios from 'axios';
 import DollarInput from '../utils/DollarInput';
 
 export default function CreateLog() {
 
     const [log, setLog] = useState({
         ticker: null,
-        strike: null,
         entry_date: null,
         entry_price: null,
         entry_premium: null,
+        expiration_date: null,
         exit_date: null,
         exit_price: null,
-        exit_premium: null
+        exit_premium: null,
+        strike: null
     });
 
+    async function handleSave() {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+        const requiredFields = [
+            "ticker",
+            "entry_date",
+            "entry_price",
+            "entry_premium",
+            "expiration_date",
+            "strike"
+        ]
+
+        const missing = requiredFields.filter(field => !log[field]);
+
+        if(missing.length > 0){
+            alert(`Please complete the following fields: ${missing.join(", ")}`);
+            return;
+        }
+        //check that ticker exists
+
+        //await axios.post(`${backendUrl}/api/positions`, log);
+
+        setLog({
+            ticker: null,
+            entry_date: null,
+            entry_price: null,
+            entry_premium: null,
+            expiration_date: null,
+            exit_date: null,
+            exit_price: null,
+            exit_premium: null,
+            strike: null
+        });
+    }
     return (
         <>
             <input
@@ -32,95 +68,80 @@ export default function CreateLog() {
                 onChange={(e) => setLog(prev => ({...prev, strike: e}))}
                 placeholder='Strike'
             />
-            <input
-                type='number'
-                placeholder='Strike'
-                min='0'
-                value={log.strike}
-                onChange={e =>
-                    setLog(prev => ({
-                        ...prev,
-                        strike: e.target.value
-                    }))
-                }
-            />
             <div>
                 <p>Entry</p>
-                <input
-                    type='date'
-                    placeholder='Enter'
-                    value={log.entry_date}
-                    onChange={e =>
-                        setLog(prev => ({
-                            ...prev,
-                            entry_date: e.target.value
-                        }))}
-                />
-                <input
-                    type='number'
+                <label>Entry Date:
+
+
+                    <input
+                        type='date'
+                        placeholder='Enter'
+                        value={log.entry_date}
+                        onChange={e =>
+                            setLog(prev => ({
+                                ...prev,
+                                entry_date: e.target.value
+                            }))}
+                    />
+                </label>
+                <DollarInput
                     placeholder='Stock Price'
-                    min='0'
                     value={log.entry_price}
-                    onChange={e =>
-                        setLog(prev => ({
-                            ...prev,
-                            entry_price: e.target.value
-                        }))
-                    }
+                    onChange={e => setLog(prev => ({...prev, entry_price: e}))}
                 />
-                <input
-                    type='number'
+                <DollarInput
                     placeholder='Premium'
-                    min='0'
                     value={log.entry_premium}
-                    onChange={e =>
-                        setLog(prev => ({
-                            ...prev,
-                            entry_premium: e.target.value
-                        }))
-                    }
+                    onChange={e => setLog(prev => ({...prev, entry_premium: e}))}
                 />
+                <label>
+                    Expiration Date:
+                    <input
+                        type='date'
+                        placeholder='Expiration'
+                        value={log.entry_premium}
+                        onChange={e =>
+                            setLog(prev => ({
+                                ...prev,
+                                expiration_date: e.target.value
+                            }))
+                        }
+                    />
+                </label>
+
             </div>
             <div>
                 <p>Exit</p>
-                <input
-                    type='date'
-                    placeholder='Enter'
-                    value={log.exit_date}
-                    onChange={e =>
-                        setLog(prev => ({
-                            ...prev,
-                            exit_date: e.target.value
-                        }))
-                    }
-                />
-                <input
-                    type='number'
+                <label>Exit Date:
+
+
+                    <input
+                        type='date'
+                        placeholder='Enter'
+                        value={log.exit_date}
+                        onChange={e =>
+                            setLog(prev => ({
+                                ...prev,
+                                exit_date: e.target.value
+                            }))
+                        }
+                    />
+                </label>
+                <DollarInput
                     placeholder='Stock Price'
-                    min='0'
-                    step="0.01"
                     value={log.exit_price}
                     onChange={e =>
-                        setLog(prev => ({
-                            ...prev,
-                            exit_price: e.target.value
-                        }))
-                    }
+                        setLog(prev => ({...prev, exit_price: e}))}
                 />
-                <input
-                    type='number'
+                <DollarInput
                     placeholder='Premium'
-                    min='0'
                     value={log.exit_premium}
-                    onChange={e =>
-                        setLog(prev => ({
-                            ...prev,
-                            exit_premium: e.target.value
-                        }))
-                    }
+                    onChange={e => setLog(prev => ({...prev, exit_premium: e}))}
                 />
             </div>
-
+            <button
+                onClick={handleSave}
+            >Save</button>
 
 
         </>
