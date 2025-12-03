@@ -1,0 +1,83 @@
+/* Base control (the visible select box) */
+.ticker-select .rs__control,
+.contract-select .rs__control {
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  color: white;
+  margin-bottom: 5px;
+  min-width: 200px;
+}
+
+.ticker-select .rs__control:hover,
+.contract-select .rs__control:hover {
+  border-color: #646cff;
+}
+
+/* Text value */
+.ticker-select .rs__single-value,
+.contract-select .rs__single-value {
+  color: white;
+}
+
+/* Input text inside the control */
+.ticker-select .rs__input input,
+.contract-select .rs__input input {
+  color: white;
+}
+
+/* Dropdown menu container */
+.ticker-select .rs__menu,
+.contract-select .rs__menu {
+  background-color: #1a1a1a;
+  color: white;
+  border: 1px solid #444;
+}
+
+/* Options in dropdown */
+.ticker-select .rs__option,
+.contract-select .rs__option {
+  background-color: #1a1a1a;
+  color: white;
+  cursor: pointer;
+}
+
+.ticker-select .rs__option--is-focused,
+.contract-select .rs__option--is-focused {
+  background-color: #333;
+}
+
+.ticker-select .rs__option--is-selected,
+.contract-select .rs__option--is-selected {
+  background-color: #535bf2;
+  color: white;
+}
+
+.entry-exit-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    width: 100%;
+}
+
+.two-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.ticker-type-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+
+}
+
+.ticker-type-container > * {
+    flex: 1;
+}
+
+input {
+    margin-bottom: 5px;
+    padding: 5px;
+}
