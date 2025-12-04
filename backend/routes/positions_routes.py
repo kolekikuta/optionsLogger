@@ -3,6 +3,7 @@ from database import db
 from models.positions import Positions
 from datetime import date
 import yfinance as yf
+from .utils_auth import get_user_id_from_request
 
 positions_blueprint = Blueprint("positions", __name__)
 
@@ -20,8 +21,8 @@ def build_contract_symbol(ticker, expiration_date, option_type, strike):
 def create_position():
     data = request.json
     contract_type = data["contract_type"].lower()
+    user_id = get_user_id_from_request()
 
-    # Default
     contract_symbol = None
     expiration = None
     strike = None
@@ -42,11 +43,11 @@ def create_position():
 
     new_position = Positions(
         contract_symbol=contract_symbol,
-        user_id=data["user_id"],
+        user_id=user_id,
         ticker=data["ticker"],
         entry_date=date.fromisoformat(data["entry_date"]),
         expiration_date=expiration,
-        type=contract_type,
+        contract_type=contract_type,
         strike=strike,
         profit_loss=data.get("profit_loss")
     )
@@ -56,8 +57,7 @@ def create_position():
 
     return {
         "status": "created",
-        "contract_symbol": contract_symbol,
-        "position_id": new_position.id
+        "id": new_position.id
     }
 
 @positions_blueprint.route("/validate_ticker", methods=["GET"])

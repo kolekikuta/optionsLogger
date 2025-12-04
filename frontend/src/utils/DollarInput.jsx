@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 export default function DollarInput({ value, onChange, ...props }) {
     return (
         <NumericFormat
-        value={value}
+        value={value ?? ""}
         thousandSeparator
         prefix="$"
         decimalScale={2}

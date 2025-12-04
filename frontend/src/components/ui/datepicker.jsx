@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-export function Calendar22({ label, value, onChange, minDate, maxDate }) {
+export function Calendar22({ label, value, onChange, disabled }) {
   const [open, setOpen] = React.useState(false)
 
   const displayDate = value  instanceof Date && !isNaN(value)
@@ -46,8 +46,7 @@ export function Calendar22({ label, value, onChange, minDate, maxDate }) {
               onChange(d)
               setOpen(false)
             }}
-            fromDate={minDate}
-            toDate={maxDate}
+            disabled={disabled}
           />
         </PopoverContent>
       </Popover>

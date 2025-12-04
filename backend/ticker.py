@@ -28,6 +28,3 @@ def download_positions_info(contract_symbols):
             continue
 
     return results
-
-res = download_positions_info(["SPY251209C00585000"])
-print(res["SPY251209C00585000"])

@@ -27,13 +27,15 @@ import {
   SelectGroup,
   SelectLabel
 } from "@/components/ui/select"
+import { createClient } from '@/lib/client'
+import { parse } from '@supabase/ssr';
 
 
 
 export default function CreateLog() {
 
     const [log, setLog] = useState({
-        ticker: null,
+        ticker: "",
         entry_date: null,
         entry_price: null,
         entry_premium: null,
@@ -42,24 +44,13 @@ export default function CreateLog() {
         exit_price: null,
         exit_premium: null,
         strike: null,
-        contract_type: null,
+        contract_type: "",
         amount: null
     });
 
     const [alertMessage, setAlertMessage] = useState("");
+    const [alertTitle, setAlertTitle] = useState("");
     const [alertOpen, setAlertOpen] = useState(false);
-
-    const [tickerInput, setTickerInput] = useState("");
-
-    const tickers = ["AAPL", "MSFT", "GOOGL", "TSLA", "SPY", "QQQ", "AMZN"].map(t => ({
-        label: t,
-        value: t
-    }));
-
-    const contract_types = ["Call", "Put", "Shares"].map(t => ({
-        label: t,
-        value: t.toLowerCase()
-    }));
 
     async function handleSave(e) {
         e.preventDefault();
@@ -88,33 +79,54 @@ export default function CreateLog() {
 
         const missing = requiredFields.filter(field => !log[field]);
 
+        // check all required fields are complete
         if(missing.length > 0){
+            setAlertTitle("Missing Fields");
             setAlertMessage(`Please complete the following fields: ${missing.join(", ")}`);
             setAlertOpen(true);
             return;
         }
 
-        // if any of exit date is filled, make sure the rest is filled
+        // check all or none of exit fields are complete
         const anyExit = log.exit_date || log.exit_price || log.exit_premium;
         const allExit = log.exit_date && log.exit_price && log.exit_premium;
         if (anyExit && !allExit) {
+            setAlertTitle("Missing Fields");
             setAlertMessage("Please complete all of the exit fields");
             setAlertOpen(true);
             return;
         }
 
-        //check that ticker exists
+        // check that ticker exists
         const isValid = await validateTicker(log.ticker);
         if(!isValid) {
+            setAlertTitle("Ticker Symbol Error")
             setAlertMessage(`Ticker "${log.ticker}" does not exist or yfinance cannot pull data for it.`);
             setAlertOpen(true);
             return;
         }
 
-        //await axios.post(`${backendUrl}/api/positions`, log);
+        const supabase = createClient();
+        const {
+            data: { session }
+        } = await supabase.auth.getSession();
+        if (!session) {
+            setAlertTitle("Error")
+            setAlertMessage("You must be logged in.");
+            setAlertOpen(true);
+            return;
+        }
 
+        await axios.post(`${backendUrl}/api/positions/create`,
+            log,
+            {
+                headers: {
+                    Authorization: `Bearer ${session.access_token}`
+                }
+            }
+        );
         setLog({
-            ticker: null,
+            ticker: "",
             entry_date: null,
             entry_price: null,
             entry_premium: null,
@@ -123,15 +135,18 @@ export default function CreateLog() {
             exit_price: null,
             exit_premium: null,
             strike: null,
-            contract_type: null,
+            contract_type: "",
             amount: null
         });
+        setAlertTitle("Success!")
+        setAlertMessage("Postion saved");
+        setAlertOpen(true);
     }
 
     async function validateTicker(ticker) {
         const backendUrl = import.meta.env.VITE_BACKEND_URL;
         try {
-            const res = await axios.get(`${backendUrl}/validate_ticker`, {
+            const res = await axios.get(`${backendUrl}/api/validate_ticker`, {
                 params: { symbol: ticker }
             });
 
@@ -155,12 +170,32 @@ export default function CreateLog() {
         return new Date(Number(y), Number(m) - 1, Number(d));
     }
 
+    function getExitDisabledRange() {
+        const entry = log.entry_date ? parseLocalDate(log.entry_date) : null;
+        const expiration = log.expiration_date ? parseLocalDate(log.expiration_date) : null;
+
+        if (entry && expiration) {
+            return {
+                before: entry,
+                after: expiration
+            };
+        }
+
+        if (entry) {
+            return {
+                before: entry
+            };
+        }
+
+        return null;
+    }
+
     return (
         <>
             <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Missing fields</AlertDialogTitle>
+                        <AlertDialogTitle>{alertTitle}</AlertDialogTitle>
                         <AlertDialogDescription>{alertMessage}</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -173,7 +208,7 @@ export default function CreateLog() {
                     <Input
                         type="text"
                         placeholder="Ticker Symbol"
-                        value={log.ticker || ""}
+                        value={log.ticker}
                         onChange={(e) =>
                             setLog(prev => ({
                                 ...prev,
@@ -181,7 +216,7 @@ export default function CreateLog() {
                             }))}
                     />
                     <Select
-                        value={log.contract_type || undefined}
+                        value={log.contract_type}
                         onValueChange={(value) =>
                             setLog(prev => ({
                                 ...prev,
@@ -212,7 +247,7 @@ export default function CreateLog() {
                             placeholder="Number of contracts"
                             step="1"
                             min="1"
-                            value={log.amount}
+                            value={log.amount || ""}
                             onChange={(e) =>
                                 setLog(prev => ({
                                     ...prev,
@@ -228,7 +263,7 @@ export default function CreateLog() {
                                     expiration_date: d ? dateToYMD(d) : null
                                 }))
                             }
-                            minDate={log.entry_date ? parseLocalDate(log.entry_date) : null}
+                            disabled={log.entry_date ? { before : parseLocalDate(log.entry_date)} : null}
                         />
                     </div>
                 )}
@@ -244,6 +279,7 @@ export default function CreateLog() {
                                     entry_date: d ? dateToYMD(d) : null
                                 }))
                             }
+                            disabled={log.expiration_date ? { after : parseLocalDate(log.expiration_date) } : null}
                         />
                         <DollarInput
                             placeholder='Stock Price'
@@ -267,6 +303,7 @@ export default function CreateLog() {
                                     exit_date: d ? dateToYMD(d) : null
                                 }))
                             }
+                            disabled={getExitDisabledRange()}
                         />
                         <DollarInput
                             placeholder='Stock Price'

@@ -6,11 +6,7 @@ class Positions(db.Model):
     __tablename__ = "positions"
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = db.Column(
-        db.String(36),
-        db.ForeignKey("auth.users.id", ondelete="CASCADE"),
-        nullable=False
-    )
+    user_id = db.Column(db.String(36), nullable=False)
     contract_symbol = db.Column(db.String, nullable=False)
     ticker = db.Column(db.String(10), nullable=False)
     contract_type = db.Column(db.String(10), nullable=False)
@@ -19,4 +15,3 @@ class Positions(db.Model):
     expiration_date = db.Column(db.Date, nullable=False)
     exit_date = db.Column(db.Date)
     profit_loss = db.Column(db.Float, default=0)
-    user = db.relationship("Users", backref="positions", lazy=True)

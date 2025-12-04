@@ -11,11 +11,6 @@ from routes.positions_routes import positions_blueprint
 from routes.ticker_history_routes import ticker_history_blueprint
 
 
-
-
-
-
-
 def create_app():
     app = Flask(__name__)
     load_dotenv()
@@ -35,15 +30,10 @@ def create_app():
 
 
 
-
-
-
-
 if __name__ == "__main__":
     app = create_app()
 
     with app.app_context():
-        db.drop_all()
         db.create_all()
 
     app.run(debug=True)

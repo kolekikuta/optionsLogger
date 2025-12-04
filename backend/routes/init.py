@@ -1,2 +1,0 @@
-from .positions_routes import positions_blueprint
-from .ticker_routes import ticker_blueprint
