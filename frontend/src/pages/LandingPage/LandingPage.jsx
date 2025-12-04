@@ -1,13 +1,20 @@
-import { useNavigate } from "react-router-dom"
+import React from "react"
+import { Link } from "react-router-dom"
+import { Button } from '@/components/ui/button'
 
-export default function LandingPage({ toSignup, toLogin }) {
+export default function LandingPage() {
 
 
     return(
         <>
             <h1>Landing Page</h1>
-            <button onClick={toSignup}>Sign Up</button>
-            <button onClick={toLogin}>Login</button>
+            <Link to="/sign-up">
+                <Button>Sign Up</Button>
+            </Link>
+            <Link to="/login">
+                <Button>Login</Button>
+            </Link>
+
         </>
     )
 }

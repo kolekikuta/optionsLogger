@@ -4,15 +4,26 @@
 - shadcn ui for table (sortable, searchable)
 - css for table row background, element colors, progress bar
 - header
+- controlled inputs for all log creator input fields
+- shadcn ui for date picker
+- figure out valid date checks
+
+### Log Creator Worflow
+- Frontend checks all required fields are completed
+- Backend verifies ticker symbol exists
+    - if not, return error code
+    - if does, save to db
 
 ### Todo
 [ ] Home page
     [ ] Chart
     [ ] Log Creator
-        - double check with brandon on request parameters
+        [x] functionality
+        [ ] formatting
     [ ] Position Logs
 [ ] Landing Page
 [ ] Login Page
+[ ] Sign Up Page
 [ ] Header (log out, home button)
 
 
@@ -31,6 +42,8 @@
     [ ] calculating returns on positions
     [x] connect to database
     [ ] fetching options chains
+        - store contract symbol on write, fetch contract info and update in databse
+    [ ] check for valid ticker in log creator
 
 ## Database
     - Users table - user information and UID
@@ -59,3 +72,6 @@
 
 - Graph - initial show portfolio value
     - focus on a log, show the entry and exit
+
+## Auth
+- supabase auth sdk

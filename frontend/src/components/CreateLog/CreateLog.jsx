@@ -98,14 +98,16 @@ export default function CreateLog() {
         const anyExit = log.exit_date || log.exit_price || log.exit_premium;
         const allExit = log.exit_date && log.exit_price && log.exit_premium;
         if (anyExit && !allExit) {
-            alert("Please complete all of the exit fields");
+            setAlertMessage("Please complete all of the exit fields");
+            setAlertOpen(true);
             return;
         }
 
         //check that ticker exists
         const isValid = await validateTicker(log.ticker);
         if(!isValid) {
-            alert("Ticker does not exist or yfinance cannot pull data for it.");
+            setAlertMessage(`Ticker "${log.ticker}" does not exist or yfinance cannot pull data for it.`);
+            setAlertOpen(true);
             return;
         }
 
@@ -171,11 +173,11 @@ export default function CreateLog() {
                     <Input
                         type="text"
                         placeholder="Ticker Symbol"
-                        value={log.ticker}
-                        onInputChange={(e) =>
+                        value={log.ticker || ""}
+                        onChange={(e) =>
                             setLog(prev => ({
                                 ...prev,
-                                ticker: e
+                                ticker: e.target.value.toUpperCase()
                             }))}
                     />
                     <Select
@@ -211,10 +213,10 @@ export default function CreateLog() {
                             step="1"
                             min="1"
                             value={log.amount}
-                            onInputChange={(e) =>
+                            onChange={(e) =>
                                 setLog(prev => ({
                                     ...prev,
-                                    amount: e
+                                    amount: e.target.value
                                 }))}
                         />
                         <Calendar22

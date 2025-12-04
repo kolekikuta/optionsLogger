@@ -1,3 +1,4 @@
+"""
 from flask import Blueprint, request
 from database import db
 from models.users import Users
@@ -17,3 +18,4 @@ def create_user():
     db.session.commit()
 
     return {"status" : "created", "user_id": new_user.id}
+"""
