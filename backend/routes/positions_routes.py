@@ -45,10 +45,16 @@ def create_position():
         contract_symbol=contract_symbol,
         user_id=user_id,
         ticker=data["ticker"],
-        entry_date=date.fromisoformat(data["entry_date"]),
-        expiration_date=expiration,
         contract_type=contract_type,
         strike=strike,
+        quantity=data.get("quantity", 1),
+        expiration_date=expiration,
+        entry_date=date.fromisoformat(data["entry_date"]),
+        entry_price=data["entry_price"],
+        entry_premium=data["entry_premium"],
+        exit_date=date.fromisoformat(data["exit_date"]) if data.get("exit_date") else None,
+        exit_price=data.get("exit_price"),
+        exit_premium=data.get("exit_premium"),
         profit_loss=data.get("profit_loss")
     )
 
@@ -74,3 +80,29 @@ def validate_ticker():
         return jsonify({"valid": False})
 
     return jsonify({"valid": True})
+
+@positions_blueprint.route("/positions", methods=["GET"])
+def get_positions():
+    user_id = get_user_id_from_request()
+    positions = Positions.query.filter_by(user_id=user_id).all()
+
+    positions_list = []
+    for pos in positions:
+        positions_list.append({
+            "id": pos.id,
+            "contract_symbol": pos.contract_symbol,
+            "ticker": pos.ticker,
+            "contract_type": pos.contract_type,
+            "strike": pos.strike,
+            "quantity": pos.quantity,
+            "expiration_date": pos.expiration_date.isoformat(),
+            "entry_date": pos.entry_date.isoformat(),
+            "entry_price": pos.entry_price,
+            "entry_premium": pos.entry_premium,
+            "exit_date": pos.exit_date.isoformat() if pos.exit_date else None,
+            "exit_price": pos.exit_price if pos.exit_price else None,
+            "exit_premium": pos.exit_premium if pos.exit_premium else None,
+            "profit_loss": pos.profit_loss
+        })
+
+    return jsonify(positions_list)

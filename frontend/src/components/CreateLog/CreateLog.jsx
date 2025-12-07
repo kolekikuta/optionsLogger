@@ -28,7 +28,6 @@ import {
   SelectLabel
 } from "@/components/ui/select"
 import { createClient } from '@/lib/client'
-import { parse } from '@supabase/ssr';
 
 
 
@@ -36,16 +35,16 @@ export default function CreateLog() {
 
     const [log, setLog] = useState({
         ticker: "",
+        contract_type: "",
+        strike: null,
+        quantity: null,
+        expiration_date: null,
         entry_date: null,
         entry_price: null,
         entry_premium: null,
-        expiration_date: null,
         exit_date: null,
         exit_price: null,
-        exit_premium: null,
-        strike: null,
-        contract_type: "",
-        amount: null
+        exit_premium: null
     });
 
     const [alertMessage, setAlertMessage] = useState("");
@@ -73,7 +72,7 @@ export default function CreateLog() {
                 "entry_premium",
                 "expiration_date",
                 "strike",
-                "amount"
+                "quantity"
             ];
         }
 
@@ -127,16 +126,16 @@ export default function CreateLog() {
         );
         setLog({
             ticker: "",
+            contract_type: "",
+            strike: null,
+            quantity: null,
+            expiration_date: null,
             entry_date: null,
             entry_price: null,
             entry_premium: null,
-            expiration_date: null,
             exit_date: null,
             exit_price: null,
             exit_premium: null,
-            strike: null,
-            contract_type: "",
-            amount: null
         });
         setAlertTitle("Success!")
         setAlertMessage("Postion saved");
@@ -247,11 +246,11 @@ export default function CreateLog() {
                             placeholder="Number of contracts"
                             step="1"
                             min="1"
-                            value={log.amount || ""}
+                            value={log.quantity || ""}
                             onChange={(e) =>
                                 setLog(prev => ({
                                     ...prev,
-                                    amount: e.target.value
+                                    quantity: e.target.value
                                 }))}
                         />
                         <Calendar22

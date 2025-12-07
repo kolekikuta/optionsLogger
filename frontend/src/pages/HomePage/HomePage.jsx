@@ -3,6 +3,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import './HomePage.css'
 import CreateLog from '../../components/CreateLog/CreateLog';
 import { LogoutButton } from '@/components/LogoutButton';
+import PositionsTable from '@/components/PositionsTable/PositionsTable';
 
 
 export default function HomePage() {
@@ -31,6 +32,7 @@ export default function HomePage() {
                 <Panel defaultSize={50} className="panel">
                     <div className="panel-container">
                         <h1>Logs</h1>
+                        <PositionsTable />
                     </div>
                 </Panel>
 
