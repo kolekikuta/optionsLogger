@@ -19,6 +19,15 @@ import {
 } from "@/components/ui/table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function PositionsTable() {
   const [positions, setPositions] = useState([]);
@@ -26,6 +35,35 @@ export default function PositionsTable() {
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const columnHelper = createColumnHelper();
+
+  const testPositions = [
+    {
+      ticker: "AAPL",
+      entry_date: "2023-01-15",
+      expiration_date: "2023-02-15",
+      exit_date: "2023-02-10",
+      dte: 30,
+      contract_type: "Call",
+      strike: 150,
+      quantity: 1,
+      entry_price: 5.00,
+      entry_premium: 500,
+      exit_price: 7.00,
+    },
+    {
+      ticker: "SPY",
+      entry_date: "2023-01-15",
+      expiration_date: "2023-02-15",
+      exit_date: "2023-02-10",
+      dte: 30,
+      contract_type: "Call",
+      strike: 150,
+      quantity: 1,
+      entry_price: 5.00,
+      entry_premium: 500,
+      exit_price: 7.00,
+    }
+  ]
 
   const columns = [
     columnHelper.accessor("ticker", {
@@ -110,7 +148,11 @@ export default function PositionsTable() {
         cell: ({ row }) => {
             return formatCurrency(row.getValue("profit_loss"))
         },
-    })
+    }),
+    columnHelper.accessor("actions", {
+      header: "",
+      cell: () => actionMenu()
+    }),
   ];
 
   // ------------------------------
@@ -143,7 +185,7 @@ export default function PositionsTable() {
   // Create React Table instance
   // ------------------------------
   const table = useReactTable({
-    data: positions,
+    data: testPositions,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -162,6 +204,23 @@ export default function PositionsTable() {
         style: "currency",
         currency: "USD",
     }).format(Number(value));
+  }
+
+  function actionMenu() {
+    return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>Edit</DropdownMenuItem>
+            <DropdownMenuItem>Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
   }
   return (
     <>

@@ -6,7 +6,14 @@
 - header
 - controlled inputs for all log creator input fields
 - shadcn ui for date picker
-- figure out valid date checks
+
+### Pages
+- Landing
+- Login
+- Sign Up
+- Forgot Password
+- Dashboard
+- Profile
 
 ### Log Creator Worflow
 - Frontend checks all required fields are completed
@@ -14,6 +21,13 @@
     - if not, return error code
     - if does, save to db
     - save on log creator should trigger re-render of position table
+- maybe dont need up all the time, plus symbol button that opens a modal??
+
+### Positions table workflow
+- action menu for editing and deleting
+- delete sends axios.delete to backend
+- edit converts fields to inputs, and shows save and cancel button
+- save sends axios.update to backend
 
 ### Todo
 [ ] Home page
@@ -26,6 +40,8 @@
 [x] Login Page
 [x] Sign Up Page
 [ ] Header (log out, home button)
+[ ] Profile page
+[ ] create profile email template
 
 
 ## Backend
@@ -41,11 +57,10 @@
     [ ] writing historical data to database
     [x] writing user data to database
     [x] writing position log to database
-    [ ] querying db for user's positions
+    [x] querying db for user's positions
     [ ] calculating returns on positions
     [x] connect to database
-    [ ] fetching options chains
-        - store contract symbol on write, fetch contract info and update in databse
+    [ ] fetching current info from yfinance
     [x] check for valid ticker in log creator
 
 ## Database
