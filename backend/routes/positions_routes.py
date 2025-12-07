@@ -85,9 +85,21 @@ def validate_ticker():
 def get_positions():
     user_id = get_user_id_from_request()
     positions = Positions.query.filter_by(user_id=user_id).all()
+    today = date.today()
 
     positions_list = []
     for pos in positions:
+        expiration = None
+        if pos.expiration_date:
+            if isinstance(pos.expiration_date, str):
+                expiration = date.fromisoformat(pos.expiration_date)
+            else:
+                expiration = pos.expiration_date
+        if expiration and expiration >= today:
+            dte = (expiration - today).days
+        else:
+            dte = None
+
         positions_list.append({
             "id": pos.id,
             "contract_symbol": pos.contract_symbol,
@@ -102,7 +114,8 @@ def get_positions():
             "exit_date": pos.exit_date.isoformat() if pos.exit_date else None,
             "exit_price": pos.exit_price if pos.exit_price else None,
             "exit_premium": pos.exit_premium if pos.exit_premium else None,
-            "profit_loss": pos.profit_loss
+            "profit_loss": pos.profit_loss,
+            "dte": dte
         })
 
     return jsonify(positions_list)

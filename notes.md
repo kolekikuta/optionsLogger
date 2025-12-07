@@ -32,6 +32,7 @@
     - Flask backend server
     - fetching historical data
     - calculating returns
+    - calculate dte for positions
 
 
 ### Todo
