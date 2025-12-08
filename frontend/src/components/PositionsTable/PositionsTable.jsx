@@ -171,6 +171,12 @@ export default function PositionsTable({ refreshKey }) {
             );
         },
     }),
+    columnHelper.accessor("profit_loss_percent", {
+        id: "profit_loss_percent",
+        header: () => null,
+        cell: () => null,
+        enableSorting: false,
+    })
   ];
 
   // ------------------------------
@@ -210,6 +216,9 @@ export default function PositionsTable({ refreshKey }) {
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
+      columnVisibility: {
+        profit_loss_percent: false,
+      },
     },
   });
 
