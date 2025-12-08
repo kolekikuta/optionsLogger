@@ -3,9 +3,8 @@
 ## Frontend
 - shadcn ui for table (sortable, searchable)
 - css for table row background, element colors, progress bar
-- header
-- controlled inputs for all log creator input fields
-- shadcn ui for date picker
+- maybe replace log creation with portfolio returns
+- framer motion for page change animations
 
 ### Pages
 - Landing
@@ -14,9 +13,11 @@
 - Forgot Password
 - Dashboard
 - Profile
+    - edit personal info
 
 ### Log Creator Worflow
 - Frontend checks all required fields are completed
+- Calendars handle date validation
 - Backend verifies ticker symbol exists
     - if not, return error code
     - if does, save to db
@@ -29,11 +30,25 @@
 - edit converts fields to inputs, and shows save and cancel button
 - save sends axios.update to backend
 
+### Header
+- Profile Icon
+    - dropdown menu, profile page
+    - logout
+
+### Charts
+- Multiple time frames
+- Zoom and hover info
+- display option entry and expiration/exit
+- default is portfolio returns, changes based on which option is selected
+
+
 ### Todo
 [ ] Home page
     [ ] Chart
     [ ] Log Creator
-        [x] functionality
+        [x] writing to db
+        [ ] modal
+        [ ] loading screen
         [ ] formatting
     [ ] Position Logs
 [ ] Landing Page
@@ -43,13 +58,20 @@
 [ ] Profile page
 [ ] create profile email template
 
-
 ## Backend
     - Flask backend server
     - fetching historical data
     - calculating returns
     - calculate dte for positions
 
+### Endpoints
+- Positions
+    - Create
+    - Get all for user
+    - Validate ticker
+
+- Historical
+    - Need to figure out what day graphs need
 
 ### Todo
     [x] function for downloading historical stock data from yfinance
@@ -59,14 +81,14 @@
     [x] writing position log to database
     [x] querying db for user's positions
     [ ] calculating returns on positions
+    [ ] calculate portfolio returns
     [x] connect to database
     [ ] fetching current info from yfinance
     [x] check for valid ticker in log creator
 
 ## Database
-    - Positions - options positions data linked to Users by UID
+    - Positions - options positions data 
     - Ticker Historical Data - historical data indexed by ticker
-
 
 ### Todo
     [x] initialize database and tables
@@ -88,8 +110,6 @@
 
 - Shares (entry date, stock price)
 
-- Graph - initial show portfolio value
-    - focus on a log, show the entry and exit
 
 ## Auth
 - supabase auth sdk
