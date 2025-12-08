@@ -6,7 +6,7 @@
 - header
 - controlled inputs for all log creator input fields
 - shadcn ui for date picker
-- figure out valid date checks
+- table cell colors for call, put and shares, maybe other colors to differentiate from profit/loss
 
 ### Log Creator Worflow
 - Frontend checks all required fields are completed

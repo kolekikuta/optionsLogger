@@ -38,6 +38,15 @@ def create_position():
             strike=strike
         )
 
+        if data.get("exit_premium") and data.get("entry_premium"):
+            entry_premium = float(data["entry_premium"])
+            exit_premium = float(data["exit_premium"])
+            quantity = int(data.get("quantity", 1))
+            profit_loss = (exit_premium - entry_premium) * quantity * 100
+            profit_loss_percent = round((profit_loss / (entry_premium * quantity * 100)) * 100, 2)
+
+
+
     elif contract_type == "shares":
         contract_symbol = data["ticker"].upper()
 
@@ -55,7 +64,8 @@ def create_position():
         exit_date=date.fromisoformat(data["exit_date"]) if data.get("exit_date") else None,
         exit_price=data.get("exit_price"),
         exit_premium=data.get("exit_premium"),
-        profit_loss=data.get("profit_loss")
+        profit_loss=profit_loss if profit_loss else 0,
+        profit_loss_percent=profit_loss_percent if profit_loss_percent else 0,
     )
 
     db.session.add(new_position)
@@ -95,10 +105,13 @@ def get_positions():
                 expiration = date.fromisoformat(pos.expiration_date)
             else:
                 expiration = pos.expiration_date
-        if expiration and expiration >= today:
+
+        if expiration and not pos.exit_date and expiration >= today:
             dte = (expiration - today).days
         else:
             dte = None
+
+        entry_amount = f"{pos.quantity} @ ${pos.entry_premium:.2f}"
 
         positions_list.append({
             "id": pos.id,
@@ -107,7 +120,7 @@ def get_positions():
             "contract_type": pos.contract_type,
             "strike": pos.strike,
             "quantity": pos.quantity,
-            "expiration_date": pos.expiration_date.isoformat(),
+            "expiration_date": pos.expiration_date.isoformat() if pos.expiration_date else None,
             "entry_date": pos.entry_date.isoformat(),
             "entry_price": pos.entry_price,
             "entry_premium": pos.entry_premium,
@@ -115,7 +128,11 @@ def get_positions():
             "exit_price": pos.exit_price if pos.exit_price else None,
             "exit_premium": pos.exit_premium if pos.exit_premium else None,
             "profit_loss": pos.profit_loss,
-            "dte": dte
+            "profit_loss_percent": pos.profit_loss_percent if pos.profit_loss_percent else None,
+            "dte": dte,
+            "entry_total": pos.entry_premium * pos.quantity * 100,
+            "entry_amount": entry_amount,
+            "exit_total": (pos.exit_premium * pos.quantity * 100) if pos.exit_premium else None
         })
 
     return jsonify(positions_list)

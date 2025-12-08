@@ -7,6 +7,7 @@ import PositionsTable from '@/components/PositionsTable/PositionsTable';
 
 
 export default function HomePage() {
+    const [refreshKey, setRefreshKey] = useState(0);
 
     return (
         <>
@@ -23,7 +24,7 @@ export default function HomePage() {
                         <Panel defaultSize={30} className="panel">
                             <div className="panel-container">
                                 <h2>New Log</h2>
-                                <CreateLog />
+                                <CreateLog refreshKey={refreshKey} setRefreshKey={setRefreshKey}/>
                             </div>
                         </Panel>
                     </PanelGroup>
@@ -32,7 +33,7 @@ export default function HomePage() {
                 <Panel defaultSize={50} className="panel">
                     <div className="panel-container">
                         <h1>Logs</h1>
-                        <PositionsTable />
+                        <PositionsTable refreshKey={refreshKey}/>
                     </div>
                 </Panel>
 

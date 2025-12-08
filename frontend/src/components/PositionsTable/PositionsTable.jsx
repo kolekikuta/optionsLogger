@@ -17,10 +17,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import SortableHeader from "@/utils/SortableHeader";
+import { parse } from "date-fns";
 
-export default function PositionsTable() {
+export default function PositionsTable({ refreshKey }) {
   const [positions, setPositions] = useState([]);
   const [sorting, setSorting] = useState([]);
 
@@ -29,70 +31,104 @@ export default function PositionsTable() {
 
   const columns = [
     columnHelper.accessor("ticker", {
-      header: ({ column }) => {
-        return (
-            <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-            Ticker
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        )
-    },
-      cell: (info) => info.getValue(),
+      header: ({ column }) => (
+        <SortableHeader column={column} title="Ticker" />
+    ),
+      cell: (info) => (
+        <span className="pl-2">{info.getValue()}</span>
+      )
     }),
     columnHelper.accessor("entry_date", {
-        header: "Entry Date",
-        cell: (info) => info.getValue(),
+        header: ({ column }) => (
+            <SortableHeader column={column} title="Entry Date" />
+        ),
+        cell: (info) => (
+            <span className="pl-2">{info.getValue()}</span>
+        )
     }),
     columnHelper.accessor("expiration_date", {
-        header: "Expiration Date",
-        cell: (info) => {
-            return info.getValue() != null ? info.getValue() : "-";
-        },
+        header: ({ column }) => (
+            <SortableHeader column={column} title="Expiration Date" />
+        ),
+        cell: (info) => (
+            <span className="pl-2">{info.getValue() != null ? info.getValue() : "-"}</span>
+        ),
     }),
     columnHelper.accessor("exit_date", {
-        header: "Exit Date",
-        cell: (info) => {
-            return info.getValue() != null ? info.getValue() : "-";
-        },
+        header: ({ column }) => (
+            <SortableHeader column={column} title="Exit Date" />
+        ),
+        cell: (info) => (
+            <span className="pl-2">{info.getValue() != null ? info.getValue() : "-"}</span>
+        ),
     }),
     columnHelper.accessor("dte", {
-        header: "DTE",
+        header: ({ column }) => (
+            <SortableHeader column={column} title="DTE" />
+        ),
         cell: (info) => {
-            return info.getValue() != null ? info.getValue() : "-";
+            const dte = info.getValue();
+            let styling = "text-white rounded-md px-2 ";
+            if (dte > 30) {
+                styling += " bg-green-700";
+            } else if (dte <= 30 && dte >= 10) {
+                styling += " bg-yellow-700";
+            } else if (dte < 10 && dte !== null) {
+                styling += " bg-red-700";
+            }
+            return (
+                <div className="pl-2">
+                    <span className={styling}>{info.getValue() != null ? info.getValue() : "-"}</span>
+                </div>
+
+            )
         },
     }),
     columnHelper.accessor("contract_type", {
-        header: "Contract Type",
-        cell: (info) => info.getValue(),
+        header: ({ column }) => (
+            <SortableHeader column={column} title="Contract Type" />
+        ),
+        cell: (info) => {
+            const value = info.getValue();
+            const str = value.charAt(0).toUpperCase() + value.slice(1);
+            let styling = "text-white rounded-md px-2 ";
+            if (value === "call") {
+                styling += "bg-green-700";
+            } else if (value === "put") {
+                styling += "bg-red-700";
+            } else {
+                styling += "bg-purple-700";
+            }
+            return (
+                <div className="pl-2">
+                    <span className={styling}>{str}</span>
+                </div>
+
+            )
+        },
     }),
     columnHelper.accessor("strike", {
         header: "Strike",
         cell: ({ row }) => {
-            return formatCurrency(row.getValue("strike"))
+            return row.getValue("strike") != null ? row.getValue("strike") : "-";
         },
     }),
-    columnHelper.accessor("quantity", {
-      header: "Quantity",
-      cell: (info) => info.getValue(),
+    columnHelper.accessor("entry_amount", {
+        header: "Entry Amount",
+        cell: (info) => info.getValue(),
     }),
-
-
+    columnHelper.accessor("entry_total", {
+        header: "Entry Total",
+        cell: ({ row }) => {
+            return formatCurrency(row.getValue("entry_total"))
+        }
+    }),
     columnHelper.accessor("entry_price", {
         header: "Entry Price",
         cell: ({ row }) => {
             return formatCurrency(row.getValue("entry_price"))
         },
     }),
-    columnHelper.accessor("entry_premium", {
-        header: "Entry Premium",
-        cell: ({ row }) => {
-            return formatCurrency(row.getValue("entry_premium"))
-        },
-    }),
-
     columnHelper.accessor("exit_price", {
         header: "Exit Price",
         cell: ({ row }) => {
@@ -105,12 +141,36 @@ export default function PositionsTable() {
             return formatCurrency(row.getValue("exit_premium"))
         },
     }),
+    columnHelper.accessor("exit_total", {
+        header: "Exit Total",
+        cell: ({ row }) => {
+            const value = row.getValue("exit_total");
+            return value != null ? formatCurrency(value) : "-";
+        },
+    }),
     columnHelper.accessor("profit_loss", {
         header: "Profit / Loss",
         cell: ({ row }) => {
-            return formatCurrency(row.getValue("profit_loss"))
+            const profit_loss = row.getValue("profit_loss");
+            const profit_loss_percent = row.getValue("profit_loss_percent");
+            let profit_loss_str = formatCurrency(profit_loss);
+
+            let styling = "text-white rounded-md px-2 ";
+            if (profit_loss != null && parseFloat(profit_loss) > 0) {
+                profit_loss_str = `+${profit_loss_str}`;
+                styling += "bg-green-700";
+            } else if (profit_loss != null && parseFloat(profit_loss) < 0) {
+                styling += "bg-red-700";
+            }
+            return (
+                <span className={styling}>
+                    <span className="font-bold">{profit_loss != null ? profit_loss_str : "-"}</span>
+                    <span className="ml-1">{profit_loss_percent != null ? `(${profit_loss_percent}%)` : ""}</span>
+                </span>
+
+            );
         },
-    })
+    }),
   ];
 
   // ------------------------------
@@ -137,7 +197,7 @@ export default function PositionsTable() {
     };
 
     fetchPositions();
-  }, []);
+  }, [refreshKey]);
 
   // ------------------------------
   // Create React Table instance

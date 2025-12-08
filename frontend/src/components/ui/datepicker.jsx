@@ -18,6 +18,8 @@ export function Calendar22({ label, value, onChange, disabled }) {
   const displayDate = value  instanceof Date && !isNaN(value)
     ? value.toLocaleDateString()
     : "Select date"
+
+  const FutureYear = new Date().getFullYear() + 10;
   return (
     <div className="flex flex-col gap-3">
         {label && (
@@ -47,6 +49,7 @@ export function Calendar22({ label, value, onChange, disabled }) {
               setOpen(false)
             }}
             disabled={disabled}
+            toYear={FutureYear}
           />
         </PopoverContent>
       </Popover>
