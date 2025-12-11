@@ -136,3 +136,17 @@ def get_positions():
         })
 
     return jsonify(positions_list)
+
+
+@positions_blueprint.route("/positions/<int:position_id>", methods=["DELETE"])
+def delete_position(position_id):
+    user_id = get_user_id_from_request()
+    position = Positions.query.filter_by(id=position_id, user_id=user_id).first()
+
+    if not position:
+        return jsonify({"error": "Position not found"}), 404
+
+    db.session.delete(position)
+    db.session.commit()
+
+    return jsonify({"status": "deleted"})

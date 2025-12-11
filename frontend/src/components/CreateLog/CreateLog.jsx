@@ -206,6 +206,7 @@ export default function CreateLog({refreshKey, setRefreshKey}) {
             <form onSubmit={handleSave}>
                 <div className="ticker-type-container">
                     <Input
+                        id="ticker-input"
                         type="text"
                         placeholder="Ticker Symbol"
                         value={log.ticker}
@@ -216,6 +217,7 @@ export default function CreateLog({refreshKey, setRefreshKey}) {
                             }))}
                     />
                     <Select
+                        id="contract-type-select"
                         value={log.contract_type}
                         onValueChange={(value) =>
                             setLog(prev => ({
@@ -238,11 +240,13 @@ export default function CreateLog({refreshKey, setRefreshKey}) {
                 {log.contract_type !== "shares" && (
                     <div>
                         <DollarInput
+                            id="strike-input"
                             value={log.strike}
                             onChange={(e) => setLog(prev => ({...prev, strike: e}))}
                             placeholder='Strike'
                         />
                         <Input
+                            id="quantity-input"
                             type="number"
                             placeholder="Number of contracts"
                             step="1"
@@ -281,11 +285,13 @@ export default function CreateLog({refreshKey, setRefreshKey}) {
                             disabled={log.expiration_date ? { after : parseLocalDate(log.expiration_date) } : null}
                         />
                         <DollarInput
+                            id="entry-stock-price-input"
                             placeholder='Entry Stock Price'
                             value={log.entry_price}
                             onChange={e => setLog(prev => ({...prev, entry_price: e}))}
                         />
                         <DollarInput
+                            id="entry-premium-input"
                             placeholder='Entry Premium'
                             value={log.entry_premium}
                             onChange={e => setLog(prev => ({...prev, entry_premium: e}))}
@@ -304,12 +310,14 @@ export default function CreateLog({refreshKey, setRefreshKey}) {
                             disabled={getExitDisabledRange()}
                         />
                         <DollarInput
+                            id="exit-stock-price-input"
                             placeholder='Exit Stock Price'
                             value={log.exit_price}
                             onChange={e =>
                                 setLog(prev => ({...prev, exit_price: e}))}
                         />
                         <DollarInput
+                            id="exit-premium-input"
                             placeholder='Exit Premium'
                             value={log.exit_premium}
                             onChange={e => setLog(prev => ({...prev, exit_premium: e}))}

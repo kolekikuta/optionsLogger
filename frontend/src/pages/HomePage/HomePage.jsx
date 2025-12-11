@@ -32,8 +32,7 @@ export default function HomePage() {
                 <PanelResizeHandle />
                 <Panel defaultSize={50} className="panel">
                     <div className="panel-container">
-                        <h1>Logs</h1>
-                        <PositionsTable refreshKey={refreshKey}/>
+                        <PositionsTable refreshKey={refreshKey} setRefreshKey={setRefreshKey}/>
                     </div>
                 </Panel>
 
