@@ -29,18 +29,9 @@ import { positionsColumns } from "./columns";
 import EditDialog from "./EditDialog";
 
 
+PositionsTable.whyDidYouRender = true
 
-
-export default function PositionsTable({ refreshKey, setRefreshKey }) {
-  const [positions, setPositions] = useState([]);
-  const [sorting, setSorting] = useState([]);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editEntry, setEditEntry] = useState(null);
-
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const columnHelper = createColumnHelper();
-
-  const testPositions = [
+const testPositions = [
     {
       id: 1,
       ticker: "AAPL",
@@ -97,6 +88,22 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
     }
   ];
 
+export default function PositionsTable({ refreshKey, setRefreshKey }) {
+
+  console.log("PositionsTable render", Date.now())
+
+  const [positions, setPositions] = useState([]);
+  const [sorting, setSorting] = useState([]);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editEntry, setEditEntry] = useState(null);
+
+
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const columnHelper = createColumnHelper();
+
+
+
   useEffect(() => {
     const fetchPositions = async () => {
       const supabase = createClient();
@@ -129,7 +136,7 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
 
   const onEdit = useCallback((entry) => {
     console.log("Editing entry:", entry);
-    //setEditEntry(entry);
+    setEditEntry(entry);
     setIsEditOpen(true);
   }, []);
 
@@ -139,7 +146,8 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
     //setRefreshKey((prevKey) => prevKey + 1);
   }, []);
 
-  const columns = useMemo(() => positionsColumns({ onEdit, onDelete }), []);
+  const columns = useMemo(() => positionsColumns({ onEdit, onDelete }), [ onEdit, onDelete ]);
+  const data = useMemo(() => testPositions, []);
   // ------------------------------
   // Create React Table instance
   // ------------------------------
@@ -148,7 +156,7 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
 
 
   const table = useReactTable({
-      data: testPositions,
+      data: data,
       columns: columns,
       getRowId: row => String(row.id),
       getCoreRowModel: getCoreRowModel(),

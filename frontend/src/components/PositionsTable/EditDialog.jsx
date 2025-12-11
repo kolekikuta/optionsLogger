@@ -23,8 +23,11 @@ import {
 import { Button } from "@/components/ui/button";
 import DollarInput from '@/utils/DollarInput'
 
+EditDialog.whyDidYouRender = true
 
-export default function EditDialog({ isOpen, onClose, onSave }) {
+export default function EditDialog({ isOpen, onClose, onSave, entry }) {
+
+  console.log("dialog render", Date.now());
 
     function handleSubmit(event) {
         event.preventDefault();
@@ -33,7 +36,12 @@ export default function EditDialog({ isOpen, onClose, onSave }) {
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog
+          open={isOpen}
+          onOpenChange={(open) => {
+            if (!open) onClose();
+          }}
+        >
         <form onSubmit={handleSubmit}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
@@ -108,10 +116,6 @@ export default function EditDialog({ isOpen, onClose, onSave }) {
                             <DollarInput id="exit-premium-1"/>
                         </div>
                     </div>
-
-
-
-
                 </div>
             </div>
             <DialogFooter>
