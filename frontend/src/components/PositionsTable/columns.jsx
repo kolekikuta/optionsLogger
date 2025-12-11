@@ -1,6 +1,3 @@
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from "lucide-react"
 import SortableHeader from "@/utils/SortableHeader";
 import {
   createColumnHelper,
@@ -9,6 +6,8 @@ import {
   useReactTable,
   getSortedRowModel,
 } from "@tanstack/react-table";
+import ActionMenu from "./ActionMenu";
+import { Button } from "@/components/ui/button";
 
 const columnHelper = createColumnHelper();
 
@@ -23,34 +22,31 @@ function formatCurrency(value) {
     }).format(Number(value));
 }
 
-async function onDelete(positionId) {
-    console.log("Deleting position with ID:", positionId);
-    //await axios.delete(`${backendUrl}/api/positions/${positionId}`);
-    //setRefreshKey((prevKey) => prevKey + 1);
-}
+export const positionsColumns = ({ onEdit, onDelete }) => [
+    {
+        accessorKey: "id",
+        enableSorting: false,
+        header: () => null
+    },
 
-function onEdit(entry) {
-    console.log("Editing entry:", entry);
-}
-
-
-
-export const positionsColumns = [
   {
     accessorKey: "ticker",
-    header: ({ column }) => <SortableHeader column={column} title="Ticker" />,
+    //header: ({ column }) => <SortableHeader column={column} title="Ticker" />,
+    header: "ticker",
     cell: ({ getValue }) => <span className="pl-2">{getValue()}</span>,
   },
 
   {
     accessorKey: "entry_date",
-    header: ({ column }) => <SortableHeader column={column} title="Entry Date" />,
+    //header: ({ column }) => <SortableHeader column={column} title="Entry Date" />,
+    header: "Entry Date",
     cell: ({ getValue }) => <span className="pl-2">{getValue()}</span>,
   },
 
   {
     accessorKey: "expiration_date",
-    header: ({ column }) => <SortableHeader column={column} title="Expiration Date" />,
+    //header: ({ column }) => <SortableHeader column={column} title="Expiration Date" />,
+    header: "Expiration Date",
     cell: ({ getValue }) => (
       <span className="pl-2">{getValue() != null ? getValue() : "-"}</span>
     ),
@@ -58,7 +54,8 @@ export const positionsColumns = [
 
   {
     accessorKey: "exit_date",
-    header: ({ column }) => <SortableHeader column={column} title="Exit Date" />,
+    //header: ({ column }) => <SortableHeader column={column} title="Exit Date" />,
+    header: "Exit Date",
     cell: ({ getValue }) => (
       <span className="pl-2">{getValue() != null ? getValue() : "-"}</span>
     ),
@@ -66,7 +63,8 @@ export const positionsColumns = [
 
   {
     accessorKey: "dte",
-    header: ({ column }) => <SortableHeader column={column} title="DTE" />,
+    //header: ({ column }) => <SortableHeader column={column} title="DTE" />,
+    header: "DTE",
     cell: ({ getValue }) => {
       const dte = getValue();
       let styling = "text-white rounded-md px-2 ";
@@ -85,7 +83,8 @@ export const positionsColumns = [
 
   {
     accessorKey: "contract_type",
-    header: ({ column }) => <SortableHeader column={column} title="Contract Type" />,
+    //header: ({ column }) => <SortableHeader column={column} title="Contract Type" />,
+    header: "Contract Type",
     cell: ({ getValue }) => {
       const value = getValue();
       const label = value.charAt(0).toUpperCase() + value.slice(1);
@@ -186,29 +185,14 @@ export const positionsColumns = [
 
   {
     id: "actions",
-    accessorKey: undefined,
-    cell: ({ row }) => {
-      const entry = row.original;
+    enableHiding: false,
+    cell: ({ row }) => (
+        <ActionMenu
+          entry={row.original}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(entry)}>
-              Edit
-            </DropdownMenuItem>
-
-            <DropdownMenuItem onClick={() => onDelete(entry.id)}>
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    ),
   },
 ];

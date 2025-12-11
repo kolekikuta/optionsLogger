@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/client";
 import {
   createColumnHelper,
@@ -27,6 +27,7 @@ import { positionsColumns } from "./columns";
 
 
 import EditDialog from "./EditDialog";
+
 
 
 
@@ -123,37 +124,44 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
 
 
   function handleEditSubmit(e) {
-    e.preventDefault();
     console.log("Edited Entry:", editEntry);
   }
 
+  const onEdit = useCallback((entry) => {
+    console.log("Editing entry:", entry);
+    //setEditEntry(entry);
+    setIsEditOpen(true);
+  }, []);
 
+  const onDelete = useCallback((positionId) => {
+    console.log("Deleting position with ID:", positionId);
+    //await axios.delete(`${backendUrl}/api/positions/${positionId}`);
+    //setRefreshKey((prevKey) => prevKey + 1);
+  }, []);
+
+  const columns = useMemo(() => positionsColumns({ onEdit, onDelete }), []);
   // ------------------------------
   // Create React Table instance
   // ------------------------------
-  let table;
 
-  try {
-    table = useReactTable({
+
+
+
+  const table = useReactTable({
       data: testPositions,
-      columns: positionsColumns,
+      columns: columns,
+      getRowId: row => String(row.id),
       getCoreRowModel: getCoreRowModel(),
       onSortingChange: setSorting,
       getSortedRowModel: getSortedRowModel(),
       state: {
         sorting,
         columnVisibility: {
+          id: false,
           profit_loss_percent: false,
         },
       },
     });
-
-  } catch (error) {
-    console.error("Error creating table:", error);
-  }
-
-
-
 
 
   return (
@@ -207,6 +215,8 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
       <EditDialog
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
+        entry={editEntry}
+        onSave={handleEditSubmit}
       />
     </>
   );

@@ -24,14 +24,17 @@ import { Button } from "@/components/ui/button";
 import DollarInput from '@/utils/DollarInput'
 
 
-export default function EditDialog({ isOpen, onClose, position, onSave }) {
+export default function EditDialog({ isOpen, onClose, onSave }) {
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        onSave?.(form);
+        onClose?.();
+    }
 
     return (
-        <Dialog>
-        <form>
-          <DialogTrigger asChild>
-            <Button variant="outline">Open Dialog</Button>
-          </DialogTrigger>
+        <Dialog open={isOpen} onOpenChange={onClose}>
+        <form onSubmit={handleSubmit}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Edit Position Log</DialogTitle>
@@ -47,11 +50,9 @@ export default function EditDialog({ isOpen, onClose, position, onSave }) {
                   <Input id="ticker" name="ticker" />
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="contract-type">Contract Type</Label>
-                    <Select
-                        id="contract-type-select"
-                    >
-                        <SelectTrigger className="w-[180px]">
+                  <Label htmlFor="contract-type-select">Contract Type</Label>
+                    <Select>
+                        <SelectTrigger className="w-[180px]" id="contract-type-select">
                             <SelectValue placeholder="Contract Type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -70,41 +71,41 @@ export default function EditDialog({ isOpen, onClose, position, onSave }) {
                   <Input id="strike-1" name="strike" />
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="strike-1">Amount</Label>
-                  <Input id="strike-1" name="strike" />
+                  <Label htmlFor="amount-1">Amount</Label>
+                  <Input id="amount-1" name="strike" />
                 </div>
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="expiration_date-1">Expiration Date</Label>
-                <Calendar22 />
+                <Label htmlFor="expiration-date-1">Expiration Date</Label>
+                <Calendar22 id="expiration-date-1"/>
               </div>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="grid gap-3">
                         <div className="grid gap-3">
                             <Label htmlFor="entry-date-1">Entry Date</Label>
-                            <Calendar22 />
+                            <Calendar22 id="entry-date-1"/>
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="entry-price-1">Entry Price</Label>
-                            <DollarInput />
+                            <DollarInput id="entry-price-1"/>
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="entry-premium-1">Entry Premium</Label>
-                            <DollarInput />
+                            <DollarInput id="entry-premium-1"/>
                         </div>
                     </div>
                     <div className="grid gap-3">
                         <div className="grid gap-3">
                             <Label htmlFor="exit-date-1">Exit Date</Label>
-                            <Calendar22 />
+                            <Calendar22 id="exit-date-1"/>
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="exit-price-1">Exit Price</Label>
-                            <DollarInput />
+                            <DollarInput id="exit-price-1"/>
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="exit-premium-1">Exit Premium</Label>
-                            <DollarInput />
+                            <DollarInput id="exit-premium-1"/>
                         </div>
                     </div>
 

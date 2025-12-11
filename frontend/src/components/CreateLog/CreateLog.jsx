@@ -217,15 +217,15 @@ export default function CreateLog({refreshKey, setRefreshKey}) {
                             }))}
                     />
                     <Select
-                        id="contract-type-select"
                         value={log.contract_type}
                         onValueChange={(value) =>
                             setLog(prev => ({
                                 ...prev,
                                 contract_type: value
                             }))}
+                        id="contract-type-select"
                     >
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[180px]" id="contract-type-select">
                             <SelectValue placeholder="Contract Type" />
                         </SelectTrigger>
                         <SelectContent>

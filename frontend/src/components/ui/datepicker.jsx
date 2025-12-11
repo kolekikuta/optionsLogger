@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-export function Calendar22({ label, value, onChange, disabled }) {
+export function Calendar22({ label, value, onChange, disabled, id="date" }) {
   const [open, setOpen] = React.useState(false)
 
   const displayDate = value  instanceof Date && !isNaN(value)
@@ -23,7 +23,7 @@ export function Calendar22({ label, value, onChange, disabled }) {
   return (
     <div className="flex flex-col gap-3">
         {label && (
-            <Label htmlFor="date" className="px-1">
+            <Label htmlFor={id} className="px-1">
                 {label}
             </Label>
         )}
@@ -32,7 +32,7 @@ export function Calendar22({ label, value, onChange, disabled }) {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            id="date"
+            id={id}
             className="w-48 justify-between font-normal"
           >
             {displayDate}
