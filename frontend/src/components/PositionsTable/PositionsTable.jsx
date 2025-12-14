@@ -2,13 +2,11 @@ import axios from "axios";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/client";
 import {
-  createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
   getSortedRowModel,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -17,19 +15,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
-
-
 import { positionsColumns } from "./columns";
-
-
 import EditDialog from "./EditDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Button } from "../ui/button";
+import { set } from "date-fns";
 
 
-PositionsTable.whyDidYouRender = true
+//PositionsTable.whyDidYouRender = true
 
 const testPositions = [
     {
@@ -41,9 +44,10 @@ const testPositions = [
       dte: 25,
       contract_type: "call",
       strike: 190,
-      entry_amount: 1,
+      quantity: 1,
       entry_total: -230,
       entry_price: 2.30,
+      entry_premium: 230,
       exit_price: null,
       exit_premium: null,
       exit_total: null,
@@ -59,9 +63,10 @@ const testPositions = [
       dte: 0,
       contract_type: "put",
       strike: 220,
-      entry_amount: 1,
+      quantity: 1,
       entry_total: -410,
       entry_price: 4.10,
+      entry_premium: 410,
       exit_price: 2.80,
       exit_premium: 280,
       exit_total: 280,
@@ -77,9 +82,10 @@ const testPositions = [
       dte: 90,
       contract_type: "call",
       strike: 900,
-      entry_amount: 1,
+      quantity: 1,
       entry_total: -1200,
       entry_price: 12.00,
+      entry_premium: 1200,
       exit_price: null,
       exit_premium: null,
       exit_total: null,
@@ -90,73 +96,91 @@ const testPositions = [
 
 export default function PositionsTable({ refreshKey, setRefreshKey }) {
 
-  console.log("PositionsTable render", Date.now())
+  const supabase = createClient();
+  const [session, setSession] = useState(null);
 
   const [positions, setPositions] = useState([]);
   const [sorting, setSorting] = useState([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editEntry, setEditEntry] = useState(null);
-
-
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const columnHelper = createColumnHelper();
 
-
+  useEffect(() => {
+    async function loadSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+    }
+    loadSession();
+  }, []);
 
   useEffect(() => {
     const fetchPositions = async () => {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-
       if (!session) return;
 
-      try {
-        const response = await axios.get(`${backendUrl}/api/positions`, {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
+      const response = await axios.get(`${backendUrl}/api/positions`, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
-        setPositions(response.data);
-      } catch (error) {
-        console.error("Error fetching positions:", error);
-      }
+      setPositions(response.data);
     };
 
     fetchPositions();
-  }, [refreshKey]);
+  }, [session, refreshKey]);
 
 
 
 
-  function handleEditSubmit(e) {
-    console.log("Edited Entry:", editEntry);
+  async function handleEditSubmit() {
+    if (!session) return;
+
+    await axios.put(`${backendUrl}/api/positions/${editEntry.id}`,
+      editEntry,
+      {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      }
+    );
+    setRefreshKey((prevKey) => prevKey + 1);
   }
 
   const onEdit = useCallback((entry) => {
-    console.log("Editing entry:", entry);
     setEditEntry(entry);
     setIsEditOpen(true);
   }, []);
 
   const onDelete = useCallback((positionId) => {
-    console.log("Deleting position with ID:", positionId);
-    //await axios.delete(`${backendUrl}/api/positions/${positionId}`);
-    //setRefreshKey((prevKey) => prevKey + 1);
+    setDeleteId(positionId);
+    setIsDeleteOpen(true);
   }, []);
+
+  async function handleDeleteSubmit() {
+    if (!session) return;
+
+    try {
+      await axios.delete(`${backendUrl}/api/positions/${deleteId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+    } catch (err) {
+      console.error("Failed to delete position", err);
+    }
+    setRefreshKey((prevKey) => prevKey + 1);
+  }
 
   const columns = useMemo(() => positionsColumns({ onEdit, onDelete }), [ onEdit, onDelete ]);
   const data = useMemo(() => testPositions, []);
-  // ------------------------------
-  // Create React Table instance
-  // ------------------------------
-
-
-
 
   const table = useReactTable({
-      data: data,
+      data: positions,
       columns: columns,
       getRowId: row => String(row.id),
       getCoreRowModel: getCoreRowModel(),
@@ -225,7 +249,30 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
         onClose={() => setIsEditOpen(false)}
         entry={editEntry}
         onSave={handleEditSubmit}
+        setEditEntry={setEditEntry}
       />
+      <AlertDialog
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              account and remove your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteSubmit}
+            >Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </>
+
   );
 }

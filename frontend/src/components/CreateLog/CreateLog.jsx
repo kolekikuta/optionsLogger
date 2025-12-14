@@ -30,6 +30,19 @@ import {
 import { createClient } from '@/lib/client'
 
 
+export function parseLocalDate(ymd) {
+    if (!ymd) return null;
+    const [y, m, d] = ymd.split("-");
+    return new Date(Number(y), Number(m) - 1, Number(d));
+}
+
+export function dateToYMD(date) {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, "0")
+    const d = String(date.getDate()).padStart(2, "0")
+    return `${y}-${m}-${d}`
+}
+
 
 export default function CreateLog({refreshKey, setRefreshKey}) {
 
@@ -157,18 +170,9 @@ export default function CreateLog({refreshKey, setRefreshKey}) {
         }
     }
 
-    function dateToYMD(date) {
-        const y = date.getFullYear()
-        const m = String(date.getMonth() + 1).padStart(2, "0")
-        const d = String(date.getDate()).padStart(2, "0")
-        return `${y}-${m}-${d}`
-    }
 
-    function parseLocalDate(ymd) {
-        if (!ymd) return null;
-        const [y, m, d] = ymd.split("-");
-        return new Date(Number(y), Number(m) - 1, Number(d));
-    }
+
+
 
     function getExitDisabledRange() {
         const entry = log.entry_date ? parseLocalDate(log.entry_date) : null;
@@ -245,19 +249,6 @@ export default function CreateLog({refreshKey, setRefreshKey}) {
                             onChange={(e) => setLog(prev => ({...prev, strike: e}))}
                             placeholder='Strike'
                         />
-                        <Input
-                            id="quantity-input"
-                            type="number"
-                            placeholder="Number of contracts"
-                            step="1"
-                            min="1"
-                            value={log.quantity || ""}
-                            onChange={(e) =>
-                                setLog(prev => ({
-                                    ...prev,
-                                    quantity: e.target.value
-                                }))}
-                        />
                         <Calendar22
                             label="Expiration Date"
                             value={log.expiration_date ? parseLocalDate(log.expiration_date) : null}
@@ -271,6 +262,19 @@ export default function CreateLog({refreshKey, setRefreshKey}) {
                         />
                     </div>
                 )}
+                <Input
+                    id="quantity-input"
+                    type="number"
+                    placeholder="Quantity"
+                    step="1"
+                    min="1"
+                    value={log.quantity || ""}
+                    onChange={(e) =>
+                        setLog(prev => ({
+                            ...prev,
+                            quantity: e.target.value
+                        }))}
+                />
                 <div className="two-columns">
                     <div className="entry-exit-container">
                         <Calendar22

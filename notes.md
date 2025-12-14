@@ -7,6 +7,8 @@
 - controlled inputs for all log creator input fields
 - shadcn ui for date picker
 - table cell colors for call, put and shares, maybe other colors to differentiate from profit/loss
+- dte color is percentage of contract time, linked to progress bar
+    - gradient
 
 ### Log Creator Worflow
 - Frontend checks all required fields are completed
@@ -33,6 +35,7 @@
     - fetching historical data
     - calculating returns
     - calculate dte for positions
+    - shares profit loss bug
 
 
 ### Todo
@@ -41,12 +44,12 @@
     [ ] writing historical data to database
     [x] writing user data to database
     [x] writing position log to database
-    [ ] querying db for user's positions
+    [x] querying db for user's positions
     [ ] calculating returns on positions
     [x] connect to database
-    [ ] fetching options chains
-        - store contract symbol on write, fetch contract info and update in databse
+    [ ] fetching current stock data for users positions
     [x] check for valid ticker in log creator
+    [x] deleting positions
 
 ## Database
     - Positions - options positions data linked to Users by UID
@@ -78,3 +81,19 @@
 
 ## Auth
 - supabase auth sdk
+
+## AI
+- AI insights and world news headlines???
+
+## Folder system
+- organize positions
+- updates table
+
+
+## Brandon
+- landing page design
+- login/sign up background
+- folder structure/tab
+- Profile
+    - portfolio information
+- ai insights prompt

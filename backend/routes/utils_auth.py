@@ -24,6 +24,10 @@ def get_public_key(token):
     raise Exception("Key not found")
 
 def get_user_id_from_request():
+
+    if request.method == "OPTIONS":
+        return None
+
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
         abort(401, "Missing Bearer token")

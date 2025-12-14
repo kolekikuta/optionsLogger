@@ -20,13 +20,20 @@ def build_contract_symbol(ticker, expiration_date, option_type, strike):
 @positions_blueprint.route("/positions/create", methods=["POST"])
 def create_position():
     data = request.json
-    contract_type = data["contract_type"].lower()
     user_id = get_user_id_from_request()
+    contract_type = data["contract_type"].lower()
 
     contract_symbol = None
     expiration = None
     strike = None
+    profit_loss = 0
+    profit_loss_percent = 0
 
+    quantity = int(data.get("quantity", 1))
+
+    # -----------------
+    # OPTIONS
+    # -----------------
     if contract_type in ("call", "put"):
         expiration = date.fromisoformat(data["expiration_date"])
         strike = float(data["strike"])
@@ -38,17 +45,39 @@ def create_position():
             strike=strike
         )
 
-        if data.get("exit_premium") and data.get("entry_premium"):
+        if data.get("entry_premium") and data.get("exit_premium"):
             entry_premium = float(data["entry_premium"])
             exit_premium = float(data["exit_premium"])
-            quantity = int(data.get("quantity", 1))
+
             profit_loss = (exit_premium - entry_premium) * quantity * 100
-            profit_loss_percent = round((profit_loss / (entry_premium * quantity * 100)) * 100, 2)
+            cost_basis = entry_premium * quantity * 100
 
+            if cost_basis > 0:
+                profit_loss_percent = round(
+                    (profit_loss / cost_basis) * 100,
+                    2
+                )
 
-
+    # -----------------
+    # SHARES
+    # -----------------
     elif contract_type == "shares":
         contract_symbol = data["ticker"].upper()
+
+        if data.get("entry_price") and data.get("exit_price"):
+            entry_price = float(data["entry_price"])
+            exit_price = float(data["exit_price"])
+
+            profit_loss = (exit_price - entry_price) * quantity
+
+            if entry_price * quantity > 0:
+                profit_loss_percent = round(
+                    (profit_loss / (entry_price * quantity)) * 100,
+                    2
+                )
+
+    else:
+        return jsonify({"error": "Invalid contract type"}), 400
 
     new_position = Positions(
         contract_symbol=contract_symbol,
@@ -56,25 +85,25 @@ def create_position():
         ticker=data["ticker"],
         contract_type=contract_type,
         strike=strike,
-        quantity=data.get("quantity", 1),
+        quantity=quantity,
         expiration_date=expiration,
         entry_date=date.fromisoformat(data["entry_date"]),
-        entry_price=data["entry_price"],
-        entry_premium=data["entry_premium"],
+        entry_price=data.get("entry_price"),
+        entry_premium=data.get("entry_premium"),
         exit_date=date.fromisoformat(data["exit_date"]) if data.get("exit_date") else None,
         exit_price=data.get("exit_price"),
         exit_premium=data.get("exit_premium"),
-        profit_loss=profit_loss if profit_loss else 0,
-        profit_loss_percent=profit_loss_percent if profit_loss_percent else 0,
+        profit_loss=profit_loss,
+        profit_loss_percent=profit_loss_percent,
     )
 
     db.session.add(new_position)
     db.session.commit()
 
-    return {
+    return jsonify({
         "status": "created",
         "id": new_position.id
-    }
+    })
 
 @positions_blueprint.route("/validate_ticker", methods=["GET"])
 def validate_ticker():
@@ -138,7 +167,7 @@ def get_positions():
     return jsonify(positions_list)
 
 
-@positions_blueprint.route("/positions/<int:position_id>", methods=["DELETE"])
+@positions_blueprint.route("/positions/<string:position_id>", methods=["DELETE"])
 def delete_position(position_id):
     user_id = get_user_id_from_request()
     position = Positions.query.filter_by(id=position_id, user_id=user_id).first()
@@ -150,3 +179,21 @@ def delete_position(position_id):
     db.session.commit()
 
     return jsonify({"status": "deleted"})
+
+@positions_blueprint.route("/positions/<string:position_id>", methods=["PUT", "OPTIONS"])
+def update_position(position_id):
+    user_id = get_user_id_from_request()
+    position = Positions.query.filter_by(id=position_id, user_id=user_id).first()
+
+    if not position:
+        return jsonify({"error": "Position not found"}), 404
+
+    data = request.json
+
+    for key, value in data.items():
+        if hasattr(position, key):
+            setattr(position, key, value)
+
+    db.session.commit()
+
+    return jsonify({"status": "updated"})

@@ -1,15 +1,8 @@
 import SortableHeader from "@/utils/SortableHeader";
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-} from "@tanstack/react-table";
 import ActionMenu from "./ActionMenu";
-import { Button } from "@/components/ui/button";
+import ProgressBar from "./ProgressBar";
+import DTE from "./dte";
 
-const columnHelper = createColumnHelper();
 
 function formatCurrency(value) {
     if (value == null || value === "" || isNaN(Number(value))) {
@@ -31,22 +24,19 @@ export const positionsColumns = ({ onEdit, onDelete }) => [
 
   {
     accessorKey: "ticker",
-    //header: ({ column }) => <SortableHeader column={column} title="Ticker" />,
-    header: "ticker",
+    header: ({ column }) => <SortableHeader column={column} title="Ticker" />,
     cell: ({ getValue }) => <span className="pl-2">{getValue()}</span>,
   },
 
   {
     accessorKey: "entry_date",
-    //header: ({ column }) => <SortableHeader column={column} title="Entry Date" />,
-    header: "Entry Date",
+    header: ({ column }) => <SortableHeader column={column} title="Entry Date" />,
     cell: ({ getValue }) => <span className="pl-2">{getValue()}</span>,
   },
 
   {
     accessorKey: "expiration_date",
-    //header: ({ column }) => <SortableHeader column={column} title="Expiration Date" />,
-    header: "Expiration Date",
+    header: ({ column }) => <SortableHeader column={column} title="Expiration Date" />,
     cell: ({ getValue }) => (
       <span className="pl-2">{getValue() != null ? getValue() : "-"}</span>
     ),
@@ -54,37 +44,47 @@ export const positionsColumns = ({ onEdit, onDelete }) => [
 
   {
     accessorKey: "exit_date",
-    //header: ({ column }) => <SortableHeader column={column} title="Exit Date" />,
-    header: "Exit Date",
+    header: ({ column }) => <SortableHeader column={column} title="Exit Date" />,
     cell: ({ getValue }) => (
       <span className="pl-2">{getValue() != null ? getValue() : "-"}</span>
     ),
   },
 
   {
-    accessorKey: "dte",
-    //header: ({ column }) => <SortableHeader column={column} title="DTE" />,
-    header: "DTE",
-    cell: ({ getValue }) => {
-      const dte = getValue();
-      let styling = "text-white rounded-md px-2 ";
-
-      if (dte > 30) styling += "bg-green-700";
-      else if (dte <= 30 && dte >= 10) styling += "bg-yellow-700";
-      else if (dte < 10 && dte != null) styling += "bg-red-700";
+    accessorKey: "progress",
+    header: "Progress",
+    cell: ({ row }) => {
+      const entryDate = row.getValue("entry_date");
+      const expirationDate = row.getValue("expiration_date");
+      const exitDate = row.getValue("exit_date");
 
       return (
-        <div className="pl-2">
-          <span className={styling}>{dte != null ? dte : "-"}</span>
-        </div>
+        <ProgressBar
+          entry={entryDate}
+          expiration={expirationDate}
+          exit={exitDate}/>
+      );
+    },
+  },
+
+  {
+    accessorKey: "dte",
+    header: ({ column }) => <SortableHeader column={column} title="DTE" />,
+    cell: ({ row }) => {
+      const dte = row.getValue("dte");
+      const entryDate = row.getValue("entry_date");
+      const expirationDate = row.getValue("expiration_date");
+      const exitDate = row.getValue("exit_date");
+
+      return (
+        <DTE entry={entryDate} expiration={expirationDate} exit={exitDate} dte={dte} />
       );
     },
   },
 
   {
     accessorKey: "contract_type",
-    //header: ({ column }) => <SortableHeader column={column} title="Contract Type" />,
-    header: "Contract Type",
+    header: ({ column }) => <SortableHeader column={column} title="Contract Type" />,
     cell: ({ getValue }) => {
       const value = getValue();
       const label = value.charAt(0).toUpperCase() + value.slice(1);
@@ -112,8 +112,8 @@ export const positionsColumns = ({ onEdit, onDelete }) => [
   },
 
   {
-    accessorKey: "entry_amount",
-    header: "Entry Amount",
+    accessorKey: "quantity",
+    header: "Quantity",
     cell: ({ getValue }) => getValue(),
   },
 
