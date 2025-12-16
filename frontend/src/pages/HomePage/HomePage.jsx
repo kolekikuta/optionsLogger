@@ -23,8 +23,7 @@ export default function HomePage() {
                         <PanelResizeHandle />
                         <Panel defaultSize={30} className="panel">
                             <div className="panel-container">
-                                <h2>New Log</h2>
-                                <CreateLog refreshKey={refreshKey} setRefreshKey={setRefreshKey}/>
+                                <h1>?</h1>
                             </div>
                         </Panel>
                     </PanelGroup>
