@@ -34,7 +34,6 @@ export default function EditDialog({ isOpen, onClose, onSave, entry, setEditEntr
         e.preventDefault();
         onSave(entry);
         onClose();
-
     }
 
     return (

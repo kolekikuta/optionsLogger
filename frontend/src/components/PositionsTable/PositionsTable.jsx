@@ -17,20 +17,9 @@ import {
 } from "@/components/ui/table";
 import { positionsColumns } from "./columns";
 import EditDialog from "./EditDialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "../ui/button";
-
+import DeleteDialog from "./DeleteDialog";
 import CreateDialog from "./CreateDialog";
+import { motion, AnimatePresence } from "framer-motion";
 
 
 //PositionsTable.whyDidYouRender = true
@@ -106,7 +95,6 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
   const [editEntry, setEditEntry] = useState(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -220,29 +208,39 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
           </TableHeader>
 
           <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+            <AnimatePresence>
+              {table.getRowModel().rows.length ? (
+
+                table.getRowModel().rows.map((row) => (
+                  <motion.tr
+                    key={row.id}
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="border-b"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </motion.tr>
+                ))) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
+                  </TableRow>
+                )}
+
+            </AnimatePresence>
           </TableBody>
         </Table>
       </div>
@@ -253,26 +251,11 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
         onSave={handleEditSubmit}
         setEditEntry={setEditEntry}
       />
-      <AlertDialog
-        open={isDeleteOpen}
-        onOpenChange={setIsDeleteOpen}
-        >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteSubmit}
-            >Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteDialog
+        isDeleteOpen={isDeleteOpen}
+        setIsDeleteOpen={setIsDeleteOpen}
+        handleDeleteSubmit={handleDeleteSubmit}
+      />
       <CreateDialog refreshKey={refreshKey} setRefreshKey={setRefreshKey}/>
     </>
 
