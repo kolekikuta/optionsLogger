@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import axios from 'axios'
 import { createClient } from '@/lib/client'
+import { getEntryDisabledRange, getExitDisabledRange } from '@/utils/datepicker'
 
 
 //EditDialog.whyDidYouRender = true
@@ -170,25 +171,7 @@ export default function CreateDialog({ refreshKey, setRefreshKey }) {
         }
     }
 
-    function getExitDisabledRange() {
-        const entry = log.entry_date ? parseLocalDate(log.entry_date) : null;
-        const expiration = log.expiration_date ? parseLocalDate(log.expiration_date) : null;
 
-        if (entry && expiration) {
-            return {
-                before: entry,
-                after: expiration
-            };
-        }
-
-        if (entry) {
-            return {
-                before: entry
-            };
-        }
-
-        return null;
-    }
 
     return (
         <>
@@ -312,7 +295,7 @@ export default function CreateDialog({ refreshKey, setRefreshKey }) {
                                     entry_date: d ? dateToYMD(d) : null,
                                     }))
                                 }
-                                disabled={log.expiration_date ? { after : parseLocalDate(log.expiration_date) } : null}
+                                disabled={getEntryDisabledRange(log.entry_date, log.expiration_date)}
                                 />
                             </div>
                             <div className="grid gap-3">
@@ -346,7 +329,7 @@ export default function CreateDialog({ refreshKey, setRefreshKey }) {
                                     exit_date: d ? dateToYMD(d) : null,
                                     }))
                                 }
-                                disabled={getExitDisabledRange()}
+                                disabled={getExitDisabledRange(log.expiration_date)}
                                 />
                             </div>
                             <div className="grid gap-3">

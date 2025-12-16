@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import DollarInput from '@/utils/DollarInput'
 import { parseLocalDate, dateToYMD } from '@/components/CreateLog/CreateLog';
+import { getEntryDisabledRange, getExitDisabledRange } from '@/utils/datepicker'
 
 //EditDialog.whyDidYouRender = true
 
@@ -118,6 +119,7 @@ export default function EditDialog({ isOpen, onClose, onSave, entry, setEditEntr
                       expiration_date: d ? dateToYMD(d) : null,
                     })
                   }
+                  disabled={log.entry_date ? { before : parseLocalDate(log.entry_date)} : null}
                 />
               </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -133,6 +135,7 @@ export default function EditDialog({ isOpen, onClose, onSave, entry, setEditEntr
                                   entry_date: d ? dateToYMD(d) : null,
                                 })
                               }
+                              disabled={getEntryDisabledRange(entry.entry_date, entry.expiration_date)}
                             />
                         </div>
                         <div className="grid gap-3">
@@ -164,6 +167,7 @@ export default function EditDialog({ isOpen, onClose, onSave, entry, setEditEntr
                                   exit_date: d ? dateToYMD(d) : null,
                                 })
                               }
+                              disabled={getExitDisabledRange(entry.expiration_date)}
                             />
                         </div>
                         <div className="grid gap-3">
