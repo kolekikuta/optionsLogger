@@ -3,17 +3,12 @@
 ## Frontend
 - shadcn ui for table (sortable, searchable)
 - css for table row background, element colors, progress bar
-- maybe replace log creation with portfolio returns
-- framer motion for page change animations
-
-### Pages
-- Landing
-- Login
-- Sign Up
-- Forgot Password
-- Dashboard
-- Profile
-    - edit personal info
+- header
+- controlled inputs for all log creator input fields
+- shadcn ui for date picker
+- table cell colors for call, put and shares, maybe other colors to differentiate from profit/loss
+- dte color is percentage of contract time, linked to progress bar
+    - gradient
 
 ### Log Creator Worflow
 - Frontend checks all required fields are completed
@@ -63,6 +58,7 @@
     - fetching historical data
     - calculating returns
     - calculate dte for positions
+    - shares profit loss bug
 
 ### Endpoints
 - Positions
@@ -83,11 +79,12 @@
     [ ] calculating returns on positions
     [ ] calculate portfolio returns
     [x] connect to database
-    [ ] fetching current info from yfinance
+    [ ] fetching current stock data for users positions
     [x] check for valid ticker in log creator
+    [x] deleting positions
 
 ## Database
-    - Positions - options positions data 
+    - Positions - options positions data
     - Ticker Historical Data - historical data indexed by ticker
 
 ### Todo
@@ -113,3 +110,19 @@
 
 ## Auth
 - supabase auth sdk
+
+## AI
+- AI insights and world news headlines???
+
+## Folder system
+- organize positions
+- updates table
+
+
+## Brandon
+- landing page design
+- login/sign up background
+- folder structure/tab
+- Profile
+    - portfolio information
+- ai insights prompt

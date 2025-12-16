@@ -1,14 +1,12 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/client";
 import {
-  createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
   getSortedRowModel,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -17,211 +15,187 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react"
+import { positionsColumns } from "./columns";
+import EditDialog from "./EditDialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Button } from "../ui/button";
+import { set } from "date-fns";
 
-export default function PositionsTable() {
-  const [positions, setPositions] = useState([]);
-  const [sorting, setSorting] = useState([]);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const columnHelper = createColumnHelper();
+//PositionsTable.whyDidYouRender = true
 
-  const testPositions = [
+const testPositions = [
     {
+      id: 1,
       ticker: "AAPL",
-      entry_date: "2023-01-15",
-      expiration_date: "2023-02-15",
-      exit_date: "2023-02-10",
-      dte: 30,
-      contract_type: "Call",
-      strike: 150,
+      entry_date: "2024-11-01",
+      expiration_date: "2024-12-20",
+      exit_date: null,
+      dte: 25,
+      contract_type: "call",
+      strike: 190,
       quantity: 1,
-      entry_price: 5.00,
-      entry_premium: 500,
-      exit_price: 7.00,
+      entry_total: -230,
+      entry_price: 2.30,
+      entry_premium: 230,
+      exit_price: null,
+      exit_premium: null,
+      exit_total: null,
+      profit_loss: null,
+      profit_loss_percent: null
     },
     {
-      ticker: "SPY",
-      entry_date: "2023-01-15",
-      expiration_date: "2023-02-15",
-      exit_date: "2023-02-10",
-      dte: 30,
-      contract_type: "Call",
-      strike: 150,
+      id: 2,
+      ticker: "TSLA",
+      entry_date: "2024-10-15",
+      expiration_date: "2024-11-15",
+      exit_date: "2024-10-28",
+      dte: 0,
+      contract_type: "put",
+      strike: 220,
       quantity: 1,
-      entry_price: 5.00,
-      entry_premium: 500,
-      exit_price: 7.00,
-    }
-  ]
-
-  const columns = [
-    columnHelper.accessor("ticker", {
-      header: ({ column }) => {
-        return (
-            <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-            Ticker
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        )
+      entry_total: -410,
+      entry_price: 4.10,
+      entry_premium: 410,
+      exit_price: 2.80,
+      exit_premium: 280,
+      exit_total: 280,
+      profit_loss: -130,
+      profit_loss_percent: -31.7
     },
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor("entry_date", {
-        header: "Entry Date",
-        cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor("expiration_date", {
-        header: "Expiration Date",
-        cell: (info) => {
-            return info.getValue() != null ? info.getValue() : "-";
-        },
-    }),
-    columnHelper.accessor("exit_date", {
-        header: "Exit Date",
-        cell: (info) => {
-            return info.getValue() != null ? info.getValue() : "-";
-        },
-    }),
-    columnHelper.accessor("dte", {
-        header: "DTE",
-        cell: (info) => {
-            return info.getValue() != null ? info.getValue() : "-";
-        },
-    }),
-    columnHelper.accessor("contract_type", {
-        header: "Contract Type",
-        cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor("strike", {
-        header: "Strike",
-        cell: ({ row }) => {
-            return formatCurrency(row.getValue("strike"))
-        },
-    }),
-    columnHelper.accessor("quantity", {
-      header: "Quantity",
-      cell: (info) => info.getValue(),
-    }),
-
-
-    columnHelper.accessor("entry_price", {
-        header: "Entry Price",
-        cell: ({ row }) => {
-            return formatCurrency(row.getValue("entry_price"))
-        },
-    }),
-    columnHelper.accessor("entry_premium", {
-        header: "Entry Premium",
-        cell: ({ row }) => {
-            return formatCurrency(row.getValue("entry_premium"))
-        },
-    }),
-
-    columnHelper.accessor("exit_price", {
-        header: "Exit Price",
-        cell: ({ row }) => {
-            return formatCurrency(row.getValue("exit_price"))
-        },
-    }),
-    columnHelper.accessor("exit_premium", {
-        header: "Exit Premium",
-        cell: ({ row }) => {
-            return formatCurrency(row.getValue("exit_premium"))
-        },
-    }),
-    columnHelper.accessor("profit_loss", {
-        header: "Profit / Loss",
-        cell: ({ row }) => {
-            return formatCurrency(row.getValue("profit_loss"))
-        },
-    }),
-    columnHelper.accessor("actions", {
-      header: "",
-      cell: () => actionMenu()
-    }),
+    {
+      id: 3,
+      ticker: "NVDA",
+      entry_date: "2024-09-10",
+      expiration_date: "2025-01-17",
+      exit_date: null,
+      dte: 90,
+      contract_type: "call",
+      strike: 900,
+      quantity: 1,
+      entry_total: -1200,
+      entry_price: 12.00,
+      entry_premium: 1200,
+      exit_price: null,
+      exit_premium: null,
+      exit_total: null,
+      profit_loss: null,
+      profit_loss_percent: null
+    }
   ];
 
-  // ------------------------------
-  // Fetch Positions
-  // ------------------------------
+export default function PositionsTable({ refreshKey, setRefreshKey }) {
+
+  const supabase = createClient();
+  const [session, setSession] = useState(null);
+
+  const [positions, setPositions] = useState([]);
+  const [sorting, setSorting] = useState([]);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editEntry, setEditEntry] = useState(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  useEffect(() => {
+    async function loadSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+    }
+    loadSession();
+  }, []);
+
   useEffect(() => {
     const fetchPositions = async () => {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-
       if (!session) return;
 
-      try {
-        const response = await axios.get(`${backendUrl}/api/positions`, {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
+      const response = await axios.get(`${backendUrl}/api/positions`, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
-        setPositions(response.data);
-      } catch (error) {
-        console.error("Error fetching positions:", error);
-      }
+      setPositions(response.data);
     };
 
     fetchPositions();
+  }, [session, refreshKey]);
+
+
+
+
+  async function handleEditSubmit() {
+    if (!session) return;
+
+    await axios.put(`${backendUrl}/api/positions/${editEntry.id}`,
+      editEntry,
+      {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      }
+    );
+    setRefreshKey((prevKey) => prevKey + 1);
+  }
+
+  const onEdit = useCallback((entry) => {
+    setEditEntry(entry);
+    setIsEditOpen(true);
   }, []);
 
-  // ------------------------------
-  // Create React Table instance
-  // ------------------------------
-  const table = useReactTable({
-    data: testPositions,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    state: {
-      sorting,
-    },
-  });
+  const onDelete = useCallback((positionId) => {
+    setDeleteId(positionId);
+    setIsDeleteOpen(true);
+  }, []);
 
-  function formatCurrency(value) {
-    if (value == null || value === "" || isNaN(Number(value))) {
-        return "-";
+  async function handleDeleteSubmit() {
+    if (!session) return;
+
+    try {
+      await axios.delete(`${backendUrl}/api/positions/${deleteId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+    } catch (err) {
+      console.error("Failed to delete position", err);
     }
-
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    }).format(Number(value));
+    setRefreshKey((prevKey) => prevKey + 1);
   }
 
-  function actionMenu() {
-    return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-  }
+  const columns = useMemo(() => positionsColumns({ onEdit, onDelete }), [ onEdit, onDelete ]);
+  const data = useMemo(() => testPositions, []);
+
+  const table = useReactTable({
+      data: positions,
+      columns: columns,
+      getRowId: row => String(row.id),
+      getCoreRowModel: getCoreRowModel(),
+      onSortingChange: setSorting,
+      getSortedRowModel: getSortedRowModel(),
+      state: {
+        sorting,
+        columnVisibility: {
+          id: false,
+          profit_loss_percent: false,
+        },
+      },
+    });
+
+
   return (
     <>
       <div className="overflow-hidden rounded-md border">
@@ -270,6 +244,35 @@ export default function PositionsTable() {
           </TableBody>
         </Table>
       </div>
+      <EditDialog
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        entry={editEntry}
+        onSave={handleEditSubmit}
+        setEditEntry={setEditEntry}
+      />
+      <AlertDialog
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              account and remove your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteSubmit}
+            >Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </>
+
   );
 }

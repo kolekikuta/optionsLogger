@@ -30,8 +30,21 @@ import {
 import { createClient } from '@/lib/client'
 
 
+export function parseLocalDate(ymd) {
+    if (!ymd) return null;
+    const [y, m, d] = ymd.split("-");
+    return new Date(Number(y), Number(m) - 1, Number(d));
+}
 
-export default function CreateLog() {
+export function dateToYMD(date) {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, "0")
+    const d = String(date.getDate()).padStart(2, "0")
+    return `${y}-${m}-${d}`
+}
+
+
+export default function CreateLog({refreshKey, setRefreshKey}) {
 
     const [log, setLog] = useState({
         ticker: "",
@@ -137,6 +150,7 @@ export default function CreateLog() {
             exit_price: null,
             exit_premium: null,
         });
+        setRefreshKey(prev => prev + 1);
         setAlertTitle("Success!")
         setAlertMessage("Postion saved");
         setAlertOpen(true);
@@ -156,18 +170,9 @@ export default function CreateLog() {
         }
     }
 
-    function dateToYMD(date) {
-        const y = date.getFullYear()
-        const m = String(date.getMonth() + 1).padStart(2, "0")
-        const d = String(date.getDate()).padStart(2, "0")
-        return `${y}-${m}-${d}`
-    }
 
-    function parseLocalDate(ymd) {
-        if (!ymd) return null;
-        const [y, m, d] = ymd.split("-");
-        return new Date(Number(y), Number(m) - 1, Number(d));
-    }
+
+
 
     function getExitDisabledRange() {
         const entry = log.entry_date ? parseLocalDate(log.entry_date) : null;
@@ -205,6 +210,7 @@ export default function CreateLog() {
             <form onSubmit={handleSave}>
                 <div className="ticker-type-container">
                     <Input
+                        id="ticker-input"
                         type="text"
                         placeholder="Ticker Symbol"
                         value={log.ticker}
@@ -221,8 +227,9 @@ export default function CreateLog() {
                                 ...prev,
                                 contract_type: value
                             }))}
+                        id="contract-type-select"
                     >
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[180px]" id="contract-type-select">
                             <SelectValue placeholder="Contract Type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -237,21 +244,10 @@ export default function CreateLog() {
                 {log.contract_type !== "shares" && (
                     <div>
                         <DollarInput
+                            id="strike-input"
                             value={log.strike}
                             onChange={(e) => setLog(prev => ({...prev, strike: e}))}
                             placeholder='Strike'
-                        />
-                        <Input
-                            type="number"
-                            placeholder="Number of contracts"
-                            step="1"
-                            min="1"
-                            value={log.quantity || ""}
-                            onChange={(e) =>
-                                setLog(prev => ({
-                                    ...prev,
-                                    quantity: e.target.value
-                                }))}
                         />
                         <Calendar22
                             label="Expiration Date"
@@ -266,9 +262,21 @@ export default function CreateLog() {
                         />
                     </div>
                 )}
+                <Input
+                    id="quantity-input"
+                    type="number"
+                    placeholder="Quantity"
+                    step="1"
+                    min="1"
+                    value={log.quantity || ""}
+                    onChange={(e) =>
+                        setLog(prev => ({
+                            ...prev,
+                            quantity: e.target.value
+                        }))}
+                />
                 <div className="two-columns">
                     <div className="entry-exit-container">
-                        <h3>Entry</h3>
                         <Calendar22
                             label="Entry Date"
                             value={log.entry_date ? parseLocalDate(log.entry_date) : null}
@@ -281,18 +289,19 @@ export default function CreateLog() {
                             disabled={log.expiration_date ? { after : parseLocalDate(log.expiration_date) } : null}
                         />
                         <DollarInput
-                            placeholder='Stock Price'
+                            id="entry-stock-price-input"
+                            placeholder='Entry Stock Price'
                             value={log.entry_price}
                             onChange={e => setLog(prev => ({...prev, entry_price: e}))}
                         />
                         <DollarInput
-                            placeholder='Premium'
+                            id="entry-premium-input"
+                            placeholder='Entry Premium'
                             value={log.entry_premium}
                             onChange={e => setLog(prev => ({...prev, entry_premium: e}))}
                         />
                     </div>
                     <div className="entry-exit-container">
-                        <h3>Exit</h3>
                         <Calendar22
                             label="Exit Date"
                             value={log.exit_date ? parseLocalDate(log.exit_date) : null}
@@ -305,13 +314,15 @@ export default function CreateLog() {
                             disabled={getExitDisabledRange()}
                         />
                         <DollarInput
-                            placeholder='Stock Price'
+                            id="exit-stock-price-input"
+                            placeholder='Exit Stock Price'
                             value={log.exit_price}
                             onChange={e =>
                                 setLog(prev => ({...prev, exit_price: e}))}
                         />
                         <DollarInput
-                            placeholder='Premium'
+                            id="exit-premium-input"
+                            placeholder='Exit Premium'
                             value={log.exit_premium}
                             onChange={e => setLog(prev => ({...prev, exit_premium: e}))}
                         />

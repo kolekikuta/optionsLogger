@@ -17,7 +17,7 @@ def create_app():
     DATABASE_URI = os.getenv("DATABASE_URI")
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
 
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
     db.init_app(app)
 
     app.register_blueprint(positions_blueprint, url_prefix="/api")

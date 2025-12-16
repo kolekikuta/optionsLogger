@@ -8,6 +8,7 @@ export default function DollarInput({ value, onChange, ...props }) {
         thousandSeparator
         prefix="$"
         decimalScale={2}
+        fixedDecimalScale
         customInput={Input}
         onValueChange={(v) => onChange?.(v.floatValue)}
         {...props}

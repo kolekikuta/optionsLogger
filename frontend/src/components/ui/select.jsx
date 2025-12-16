@@ -26,10 +26,12 @@ function SelectTrigger({
   className,
   size = "default",
   children,
+  id,
   ...props
 }) {
   return (
     <SelectPrimitive.Trigger
+      id={id}
       data-slot="select-trigger"
       data-size={size}
       className={cn(
