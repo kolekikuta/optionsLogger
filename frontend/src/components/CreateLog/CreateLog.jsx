@@ -29,20 +29,6 @@ import {
 import { createClient } from '@/lib/client'
 
 
-export function parseLocalDate(ymd) {
-    if (!ymd) return null;
-    const [y, m, d] = ymd.split("-");
-    return new Date(Number(y), Number(m) - 1, Number(d));
-}
-
-export function dateToYMD(date) {
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, "0")
-    const d = String(date.getDate()).padStart(2, "0")
-    return `${y}-${m}-${d}`
-}
-
-
 export default function CreateLog({refreshKey, setRefreshKey}) {
 
     const [log, setLog] = useState({

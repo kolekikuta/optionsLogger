@@ -1,4 +1,4 @@
-import { parseLocalDate } from "../CreateLog/CreateLog";
+import { parseLocalDate } from "@/utils/parseLocalDate"
 import { getProgressColor, progressBg } from "@/utils/progressColor";
 
 export default function DTE({ entry, expiration, exit, dte }) {
