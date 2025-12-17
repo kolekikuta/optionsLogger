@@ -22,7 +22,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
 import DollarInput from '@/utils/DollarInput'
-import { parseLocalDate, dateToYMD } from '@/components/CreateLog/CreateLog';
+import { parseLocalDate } from '@/utils/parseLocalDate'
+import { dateToYMD } from '@/utils/dateToYMD'
 
 //EditDialog.whyDidYouRender = true
 

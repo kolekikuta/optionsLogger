@@ -1,4 +1,4 @@
-import { parseLocalDate } from "../CreateLog/CreateLog";
+import { parseLocalDate } from "@/utils/parseLocalDate";
 import { getProgressColor, progressGradients } from "@/utils/progressColor";
 
 export default function ProgressBar({ entry, expiration, exit }) {
