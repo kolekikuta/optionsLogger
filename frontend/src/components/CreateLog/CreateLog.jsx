@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
 import DollarInput from '../../utils/DollarInput';
-import CreatableSelect from "react-select/creatable";
 import './CreateLog.css'
 import { Calendar22 } from '../ui/datepicker';
 import { Input } from  '../ui/input';

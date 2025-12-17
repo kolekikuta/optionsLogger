@@ -29,7 +29,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "../ui/button";
-import { set } from "date-fns";
+
+import CreateDialog from "./CreateDialog";
 
 
 //PositionsTable.whyDidYouRender = true
@@ -105,6 +106,7 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
   const [editEntry, setEditEntry] = useState(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -271,7 +273,7 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
+      <CreateDialog refreshKey={refreshKey} setRefreshKey={setRefreshKey}/>
     </>
 
   );

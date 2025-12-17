@@ -12,23 +12,46 @@
 
 ### Log Creator Worflow
 - Frontend checks all required fields are completed
+- Calendars handle date validation
 - Backend verifies ticker symbol exists
     - if not, return error code
     - if does, save to db
     - save on log creator should trigger re-render of position table
+- maybe dont need up all the time, plus symbol button that opens a modal??
+
+### Positions table workflow
+- action menu for editing and deleting
+- delete sends axios.delete to backend
+- edit converts fields to inputs, and shows save and cancel button
+- save sends axios.update to backend
+
+### Header
+- Profile Icon
+    - dropdown menu, profile page
+    - logout
+
+### Charts
+- Multiple time frames
+- Zoom and hover info
+- display option entry and expiration/exit
+- default is portfolio returns, changes based on which option is selected
+
 
 ### Todo
 [ ] Home page
     [ ] Chart
     [ ] Log Creator
-        [x] functionality
+        [x] writing to db
+        [ ] modal
+        [ ] loading screen
         [ ] formatting
     [ ] Position Logs
 [ ] Landing Page
 [x] Login Page
 [x] Sign Up Page
 [ ] Header (log out, home button)
-
+[ ] Profile page
+[ ] create profile email template
 
 ## Backend
     - Flask backend server
@@ -37,6 +60,14 @@
     - calculate dte for positions
     - shares profit loss bug
 
+### Endpoints
+- Positions
+    - Create
+    - Get all for user
+    - Validate ticker
+
+- Historical
+    - Need to figure out what day graphs need
 
 ### Todo
     [x] function for downloading historical stock data from yfinance
@@ -46,15 +77,15 @@
     [x] writing position log to database
     [x] querying db for user's positions
     [ ] calculating returns on positions
+    [ ] calculate portfolio returns
     [x] connect to database
     [ ] fetching current stock data for users positions
     [x] check for valid ticker in log creator
     [x] deleting positions
 
 ## Database
-    - Positions - options positions data linked to Users by UID
+    - Positions - options positions data
     - Ticker Historical Data - historical data indexed by ticker
-
 
 ### Todo
     [x] initialize database and tables
@@ -76,8 +107,6 @@
 
 - Shares (entry date, stock price)
 
-- Graph - initial show portfolio value
-    - focus on a log, show the entry and exit
 
 ## Auth
 - supabase auth sdk
