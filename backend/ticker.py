@@ -2,6 +2,9 @@ import yfinance as yf
 import pandas as pd
 from datetime import date
 import datetime
+import database as db
+from models.ticker_history import Ticker_History
+from app import create_app
 
 def download_ticker(ticker, start_date, end_date):
     try:
@@ -28,3 +31,4 @@ def download_positions_info(contract_symbols):
             continue
 
     return results
+

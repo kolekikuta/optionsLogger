@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
 import DollarInput from '@/utils/DollarInput'
-import { parseLocalDate, dateToYMD } from '@/components/CreateLog/CreateLog';
+import { parseLocalDate } from '@/utils/parseLocalDate'
+import { dateToYMD } from '@/utils/dateToYMD'
 import { Plus } from "lucide-react"
 import {
   AlertDialog,
@@ -46,8 +47,8 @@ import { getEntryDisabledRange, getExitDisabledRange } from '@/utils/datepicker'
 export default function CreateDialog({ refreshKey, setRefreshKey }) {
 
     const [log, setLog] = useState({
-        ticker: "",
-        contract_type: "",
+        ticker: undefined,
+        contract_type: undefined,
         strike: null,
         quantity: null,
         expiration_date: null,
@@ -110,20 +111,37 @@ export default function CreateDialog({ refreshKey, setRefreshKey }) {
         }
 
         // check that ticker exists
-        const isValid = await validateTicker(log.ticker);
-        if(!isValid) {
-            setAlertTitle("Ticker Symbol Error")
-            setAlertMessage(`Ticker "${log.ticker}" does not exist or yfinance cannot pull data for it.`);
+        const result = await validateTicker(log.ticker);
+        if (!result.ok) {
+            if (result.reason === "network") {
+                setAlertTitle("Connection Error");
+                setAlertMessage(
+                "Cannot reach the server. Please check your connection or try again later."
+                );
+            } else {
+                setAlertTitle("Server Error");
+                setAlertMessage("The server responded with an error.");
+            }
+
+        setAlertOpen(true);
+        return;
+        }
+
+            if (!result.valid) {
+                setAlertTitle("Ticker Symbol Error");
+                setAlertMessage(
+                    `Ticker "${log.ticker}" does not exist or data cannot be retrieved.`
+                );
             setAlertOpen(true);
             return;
-        }
+            }
 
         const supabase = createClient();
         const {
             data: { session }
         } = await supabase.auth.getSession();
         if (!session) {
-            setAlertTitle("Error")
+            setAlertTitle("Error");
             setAlertMessage("You must be logged in.");
             setAlertOpen(true);
             return;
@@ -138,8 +156,8 @@ export default function CreateDialog({ refreshKey, setRefreshKey }) {
             }
         );
         setLog({
-            ticker: "",
-            contract_type: "",
+            ticker: undefined,
+            contract_type: undefined,
             strike: null,
             quantity: null,
             expiration_date: null,
@@ -161,13 +179,28 @@ export default function CreateDialog({ refreshKey, setRefreshKey }) {
         const backendUrl = import.meta.env.VITE_BACKEND_URL;
         try {
             const res = await axios.get(`${backendUrl}/api/validate_ticker`, {
-                params: { symbol: ticker }
+                params: { symbol: ticker },
+                timeout: 5000,
             });
 
-            return res.data.valid;
+            return {
+                ok: true,
+                valid: res.data.valid,
+            };
         } catch (err) {
+            if (!err.response) {
+                return {
+                    ok: false,
+                    reason: "network",
+                };
+            }
+
             console.error("Ticker validation failed:", err);
-            return false;
+            return {
+                ok: false,
+                reason: "backend",
+                status: err.response.status,
+            };
         }
     }
 

@@ -4,6 +4,7 @@ import './HomePage.css'
 import CreateLog from '../../components/CreateLog/CreateLog';
 import { LogoutButton } from '@/components/LogoutButton';
 import PositionsTable from '@/components/PositionsTable/PositionsTable';
+import Charts from '@/components/Charts/Charts';
 
 
 export default function HomePage() {
@@ -17,7 +18,7 @@ export default function HomePage() {
                     <PanelGroup direction="horizontal">
                         <Panel defaultSize={70} className="panel">
                             <div className="panel-container">
-                                <h1>Chart</h1>
+                                <Charts />
                             </div>
                         </Panel>
                         <PanelResizeHandle />

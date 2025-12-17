@@ -5,7 +5,6 @@ from flask_cors import CORS
 import datetime
 
 from database import db
-from ticker import download_ticker
 from routes.positions_routes import positions_blueprint
 #from routes.users_routes import users_blueprint
 from routes.ticker_history_routes import ticker_history_blueprint

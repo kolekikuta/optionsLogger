@@ -14,7 +14,7 @@ import { loader } from "./app/routes/auth.confirm"
 import { protectedLoader } from "./app/routes/protected"
 import Page from "./app/routes/auth.error"
 import { logoutAction } from './app/routes/logout'
-import './wdyr.js'
+
 
 const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
