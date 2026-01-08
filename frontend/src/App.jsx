@@ -14,6 +14,7 @@ import { loader } from "./app/routes/auth.confirm"
 import { protectedLoader } from "./app/routes/protected"
 import Page from "./app/routes/auth.error"
 import { logoutAction } from './app/routes/logout'
+import DashboardLayout from './layouts/DashboardLayout.jsx'
 
 
 const router = createBrowserRouter([
@@ -22,7 +23,9 @@ const router = createBrowserRouter([
   { path: "/sign-up", element: <SignUp />, action: signupAction },
   { path: "/forgot-password", element: <ForgotPassword /> },
   { path: "/update-password", element: <UpdatePassword /> },
-  { path: "/dashboard", loader: protectedLoader, element: <HomePage /> },
+  { path: "/dashboard", loader: protectedLoader, element: <DashboardLayout />, children: [
+    { index: true, element: <HomePage /> },
+  ]},
   { path: "/auth/confirm", loader: loader, element: <div>Confirming...</div> },
   { path: "/auth/error", element:<Page /> },
   { path: "/logout", action: logoutAction}
@@ -37,14 +40,5 @@ export default function App() {
 
   return (
     <RouterProvider router={router} />
-    /*
-    <>
-      <Routes>
-        <Route path="/" element={<LandingPage toSignup={toSignup} toLogin={toLogin}/>}/>
-        <Route path="/dashboard" element={<HomePage />}/>
-        <Route path="/login" element={<Login />}/>
-        <Route path="/signup" element={<SignupPage toLogin={toLogin}/>}/>
-      </Routes>
-    </>*/
   )
 }

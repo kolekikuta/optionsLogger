@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { createClient } from '@/lib/client';
+import { getCached } from '@/lib/cache'
 import { TrendingUp } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,25 +36,23 @@ export default function Charts() {
         if (!session) return;
         const fetchData = async () => {
             const { start, end } = getDateRange(timeframe);
+            const key = `ticker-history:SPY:${start}:${end}`
 
-            const response = await axios.get(`${backendUrl}/api/ticker/history`, {
-                params: {
-                    symbol: "SPY",
-                    start: start,
-                    end: end,
+            const rows = await getCached(
+                key,
+                async () => {
+                    const response = await axios.get(`${backendUrl}/api/ticker/history`, {
+                        params: { symbol: "SPY", start, end },
+                        headers: { Authorization: `Bearer ${session.access_token}` },
+                    })
+                    return response.data.map(row => ({ date: row.date, close: row.close }))
                 },
-                headers: {
-                    Authorization: `Bearer ${session.access_token}`,
-                },
-            });
-            const formatted = response.data.map(row => ({
-                date: row.date,
-                close: row.close,
-            }));
-            console.log(timeframe, formatted.length, formatted[0], formatted.at(-1))
-            setData(formatted);
+                5 * 60 * 1000 // 5 minutes
+            )
+
+            setData(rows)
         }
-        fetchData();
+        fetchData()
     }, [session, timeframe]);
 
     const chartConfig = {
@@ -108,7 +107,6 @@ export default function Charts() {
                 <div className="flex justify-between">
                     <div>
                         <CardTitle>Line Chart - Linear</CardTitle>
-                        <CardDescription>January - June 2024</CardDescription>
                     </div>
                     <div>
                         {timeframes.map(tf => (

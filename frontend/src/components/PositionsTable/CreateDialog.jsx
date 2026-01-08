@@ -239,7 +239,7 @@ export default function CreateDialog({ refreshKey, setRefreshKey }) {
                     done.
                 </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4">
+                <div className="grid gap-4 mb-4">
                 <div className="grid grid-col-2 gap-3">
                     <div className="grid gap-3">
                     <Label htmlFor="ticker">Ticker</Label>

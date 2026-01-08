@@ -26,7 +26,6 @@ import { getEntryDisabledRange, getExitDisabledRange } from '@/utils/datepicker'
 import { parseLocalDate } from '@/utils/parseLocalDate'
 import { dateToYMD } from '@/utils/dateToYMD'
 
-//EditDialog.whyDidYouRender = true
 
 export default function EditDialog({ isOpen, onClose, onSave, entry, setEditEntry }) {
 
@@ -55,7 +54,7 @@ export default function EditDialog({ isOpen, onClose, onSave, entry, setEditEntr
                 done.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4">
+            <div className="grid gap-4 mb-4">
               <div className="grid grid-col-2 gap-3">
                 <div className="grid gap-3">
                   <Label htmlFor="ticker">Ticker</Label>
@@ -120,7 +119,7 @@ export default function EditDialog({ isOpen, onClose, onSave, entry, setEditEntr
                       expiration_date: d ? dateToYMD(d) : null,
                     })
                   }
-                  disabled={log.entry_date ? { before : parseLocalDate(log.entry_date)} : null}
+                  disabled={entry.entry_date ? { before: parseLocalDate(entry.entry_date) } : null}
                 />
               </div>
                 <div className="grid grid-cols-2 gap-3">

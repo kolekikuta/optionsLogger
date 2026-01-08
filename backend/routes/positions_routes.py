@@ -4,6 +4,8 @@ from models.positions import Positions
 from datetime import date
 import yfinance as yf
 from .utils_auth import get_user_id_from_request
+from models.folder_positions import FolderPositions
+from models.folders import Folders
 
 positions_blueprint = Blueprint("positions", __name__)
 
@@ -197,3 +199,57 @@ def update_position(position_id):
     db.session.commit()
 
     return jsonify({"status": "updated"})
+
+# get all folders for a position
+@positions_blueprint.route("/positions/<string:position_id>/folders", methods=["GET"])
+def get_position_folders(position_id):
+    user_id = get_user_id_from_request()
+    position = Positions.query.filter_by(id=position_id, user_id=user_id).first()
+
+    if not position:
+        return jsonify({"error": "Position not found"}), 404
+
+    folders = (
+        db.session.query(Folders)
+        .join(FolderPositions, Folders.id == FolderPositions.folder_id)
+        .filter(FolderPositions.position_id == position_id)
+        .all()
+    )
+
+    folders_list = [
+        {
+            "id": folder.id,
+            "user_id": folder.user_id,
+            "name": folder.name
+        }
+        for folder in folders
+    ]
+
+    return jsonify(folders_list), 200
+
+# update a position's folders
+@positions_blueprint.route("/positions/<string:position_id>/folders", methods=["PUT"])
+def update_position_folders(position_id):
+    data = request.json
+    user_id = get_user_id_from_request()
+    position = Positions.query.filter_by(id=position_id, user_id=user_id).first()
+
+    if not position:
+        return jsonify({"error": "Position not found"}), 404
+
+    new_folder_ids = data.get("folder_ids", [])
+
+    # Remove existing associations
+    FolderPositions.query.filter_by(position_id=position_id).delete()
+
+    # Add new associations
+    for folder_id in new_folder_ids:
+        new_association = FolderPositions(
+            folder_id=folder_id,
+            position_id=position_id
+        )
+        db.session.add(new_association)
+
+    db.session.commit()
+
+    return jsonify({"status": "updated"}), 200

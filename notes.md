@@ -2,7 +2,6 @@
 
 ## Frontend
 - shadcn ui for table (sortable, searchable)
-- css for table row background, element colors, progress bar
 - header
 - controlled inputs for all log creator input fields
 - shadcn ui for date picker
@@ -24,6 +23,7 @@
 - delete sends axios.delete to backend
 - edit converts fields to inputs, and shows save and cancel button
 - save sends axios.update to backend
+- pagination in table
 
 ### Header
 - Profile Icon
@@ -36,16 +36,21 @@
 - display option entry and expiration/exit
 - default is portfolio returns, changes based on which option is selected
 
+### Folder Structure
+- pop out sidebar with folders, portfolio value, etc
+- entry/row action menu - edit folders dialog
+- in table, indicate which folders the position belongs to
+- clicking on folder closes sidebar and changes positions in table
+
 
 ### Todo
 [ ] Home page
     [ ] Chart
-    [ ] Log Creator
+    [x] Log Creator
         [x] writing to db
-        [ ] modal
-        [ ] loading screen
-        [ ] formatting
+        [x] modal
     [ ] Position Logs
+        [ ] pagination
 [ ] Landing Page
 [x] Login Page
 [x] Sign Up Page
@@ -69,27 +74,35 @@
 - Historical
     - Need to figure out what day graphs need
 
+- Folders
+    - Create
+    - Read
+    - Update
+    - Delete
+
 ### Todo
-    [x] function for downloading historical stock data from yfinance
-    [ ] querying database for existing historical data
-    [ ] writing historical data to database
-    [x] writing user data to database
-    [x] writing position log to database
-    [x] querying db for user's positions
-    [ ] calculating returns on positions
-    [ ] calculate portfolio returns
-    [x] connect to database
-    [ ] fetching current stock data for users positions
-    [x] check for valid ticker in log creator
-    [x] deleting positions
+[x] function for downloading historical stock data from yfinance
+[x] querying database for existing historical data
+[x] writing historical data to database
+[x] writing user data to database
+[x] writing position log to database
+[x] querying db for user's positions
+[ ] calculating returns on positions
+[ ] calculate portfolio returns
+[x] connect to database
+[ ] fetching current stock data for users positions
+[x] check for valid ticker in log creator
+[x] deleting positions
 
 ## Database
     - Positions - options positions data
     - Ticker Historical Data - historical data indexed by ticker
+    - Folder - names of folders and user id's
+    - FolderPosition - join table of folder_id's and position_id's
 
 ### Todo
-    [x] initialize database and tables
-    [ ] row level auth (read/write)
+[x] initialize database and tables
+[x] row level auth (read/write)
 
 ## Log Creator
 - Entry Date
@@ -102,9 +115,7 @@
 - Current stock data and options chains
     - if position isnt closed, just make exit values the current amount
 - Amount/Number (number of contracts at 100 shares)
-
 - Stock Price Column (entry on left, exit or current)
-
 - Shares (entry date, stock price)
 
 
@@ -126,3 +137,10 @@
 - Profile
     - portfolio information
 - ai insights prompt
+
+
+## Greeks
+- calculate greeks
+- find theta
+- create projections
+- optimize contract expiration, strike, etc

@@ -9,7 +9,7 @@ export function getProgressColor(percentage) {
 
 
 export const progressGradients = {
-    gray: "from-gray-500 to-gray-400",
+    gray: "from-gray-800 to-gray-700",
     blue: "from-blue-700 to-blue-500",
     green: "from-green-700 to-green-500",
     yellow: "from-yellow-600 to-yellow-400",

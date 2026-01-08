@@ -20,230 +20,163 @@ import EditDialog from "./EditDialog";
 import DeleteDialog from "./DeleteDialog";
 import CreateDialog from "./CreateDialog";
 import { motion, AnimatePresence } from "framer-motion";
+import MoveDialog from "./MoveDialog";
 
 
-//PositionsTable.whyDidYouRender = true
 
-const testPositions = [
-    {
-      id: 1,
-      ticker: "AAPL",
-      entry_date: "2024-11-01",
-      expiration_date: "2024-12-20",
-      exit_date: null,
-      dte: 25,
-      contract_type: "call",
-      strike: 190,
-      quantity: 1,
-      entry_total: -230,
-      entry_price: 2.30,
-      entry_premium: 230,
-      exit_price: null,
-      exit_premium: null,
-      exit_total: null,
-      profit_loss: null,
-      profit_loss_percent: null
-    },
-    {
-      id: 2,
-      ticker: "TSLA",
-      entry_date: "2024-10-15",
-      expiration_date: "2024-11-15",
-      exit_date: "2024-10-28",
-      dte: 0,
-      contract_type: "put",
-      strike: 220,
-      quantity: 1,
-      entry_total: -410,
-      entry_price: 4.10,
-      entry_premium: 410,
-      exit_price: 2.80,
-      exit_premium: 280,
-      exit_total: 280,
-      profit_loss: -130,
-      profit_loss_percent: -31.7
-    },
-    {
-      id: 3,
-      ticker: "NVDA",
-      entry_date: "2024-09-10",
-      expiration_date: "2025-01-17",
-      exit_date: null,
-      dte: 90,
-      contract_type: "call",
-      strike: 900,
-      quantity: 1,
-      entry_total: -1200,
-      entry_price: 12.00,
-      entry_premium: 1200,
-      exit_price: null,
-      exit_premium: null,
-      exit_total: null,
-      profit_loss: null,
-      profit_loss_percent: null
-    }
-  ];
+/* ---------------- Main Component ---------------- */
 
 export default function PositionsTable({ refreshKey, setRefreshKey }) {
-
   const supabase = createClient();
-  const [session, setSession] = useState(null);
 
+  const [session, setSession] = useState(null);
   const [positions, setPositions] = useState([]);
   const [sorting, setSorting] = useState([]);
+
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editEntry, setEditEntry] = useState(null);
+
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
+  const [moveEntry, setMoveEntry] = useState(null);
+  const [isMoveOpen, setIsMoveOpen] = useState(false);
+
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+  /* ---------------- Auth ---------------- */
+
   useEffect(() => {
-    async function loadSession() {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-    }
-    loadSession();
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
   }, []);
 
+  /* ---------------- Fetch ---------------- */
+
   useEffect(() => {
-    const fetchPositions = async () => {
-      if (!session) return;
-
-      const response = await axios.get(`${backendUrl}/api/positions`, {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
-      setPositions(response.data);
-    };
-
-    fetchPositions();
-  }, [session, refreshKey]);
-
-
-
-
-  async function handleEditSubmit() {
     if (!session) return;
 
-    await axios.put(`${backendUrl}/api/positions/${editEntry.id}`,
-      editEntry,
-      {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      }
-    );
-    setRefreshKey((prevKey) => prevKey + 1);
-  }
+    axios
+      .get(`${backendUrl}/api/positions`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      .then(res => setPositions(res.data));
+  }, [session, refreshKey]);
 
-  const onEdit = useCallback((entry) => {
+  /* ---------------- Actions ---------------- */
+
+  const onEdit = useCallback(entry => {
     setEditEntry(entry);
     setIsEditOpen(true);
   }, []);
 
-  const onDelete = useCallback((positionId) => {
-    setDeleteId(positionId);
+  const onDelete = useCallback(id => {
+    setDeleteId(id);
     setIsDeleteOpen(true);
   }, []);
 
-  async function handleDeleteSubmit() {
-    if (!session) return;
+  const onMove = useCallback(entry => {
+    setMoveEntry(entry);
+    setIsMoveOpen(true);
+  }, []);
 
-    try {
-      await axios.delete(`${backendUrl}/api/positions/${deleteId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        }
-      );
-    } catch (err) {
-      console.error("Failed to delete position", err);
-    }
-    setRefreshKey((prevKey) => prevKey + 1);
+  async function handleEditSubmit() {
+    await axios.put(
+      `${backendUrl}/api/positions/${editEntry.id}`,
+      editEntry,
+      { headers: { Authorization: `Bearer ${session.access_token}` } }
+    );
+    setRefreshKey(k => k + 1);
   }
 
-  const columns = useMemo(() => positionsColumns({ onEdit, onDelete }), [ onEdit, onDelete ]);
-  const data = useMemo(() => testPositions, []);
+  async function handleDeleteSubmit() {
+    await axios.delete(`${backendUrl}/api/positions/${deleteId}`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    setRefreshKey(k => k + 1);
+  }
+
+  async function handleMoveSubmit(entry, folderIds) {
+    await axios.put(
+      `${backendUrl}/api/positions/${entry.id}/folders`,
+      { folder_ids: folderIds },
+      { headers: { Authorization: `Bearer ${session.access_token}` } }
+    );
+    setRefreshKey(k => k + 1);
+  }
+
+  /* ---------------- Table ---------------- */
+
+  const columns = useMemo(
+    () => positionsColumns({ onEdit, onDelete, onMove }),
+    [onEdit, onDelete]
+  );
 
   const table = useReactTable({
-      data: positions,
-      columns: columns,
-      getRowId: row => String(row.id),
-      getCoreRowModel: getCoreRowModel(),
-      onSortingChange: setSorting,
-      getSortedRowModel: getSortedRowModel(),
-      state: {
-        sorting,
-        columnVisibility: {
-          id: false,
-          profit_loss_percent: false,
-        },
+    data: positions,
+    columns,
+    getRowId: row => String(row.id),
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: {
+      sorting,
+      columnVisibility: {
+        id: false,
+        profit_loss_percent: false,
       },
-    });
+    },
+  });
 
+  /* ---------------- Render ---------------- */
 
   return (
     <>
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
+        <div className="overflow-hidden rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map(group => (
+                <TableRow key={group.id}>
+                  {group.headers.map(header => (
+                    <TableHead key={header.id}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
 
-          <TableBody>
-            <AnimatePresence>
-              {table.getRowModel().rows.length ? (
-
-                table.getRowModel().rows.map((row) => (
-                  <motion.tr
-                    key={row.id}
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="border-b"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </motion.tr>
-                ))) : (
+            <TableBody>
+              <AnimatePresence>
+                {table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map(row => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
                   <TableRow>
                     <TableCell
                       colSpan={columns.length}
                       className="h-24 text-center"
                     >
-                      No results.
+                      No results
                     </TableCell>
                   </TableRow>
                 )}
+              </AnimatePresence>
+            </TableBody>
+          </Table>
+        </div>
 
-            </AnimatePresence>
-          </TableBody>
-        </Table>
-      </div>
       <EditDialog
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
@@ -251,13 +184,20 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
         onSave={handleEditSubmit}
         setEditEntry={setEditEntry}
       />
+
       <DeleteDialog
         isDeleteOpen={isDeleteOpen}
         setIsDeleteOpen={setIsDeleteOpen}
         handleDeleteSubmit={handleDeleteSubmit}
       />
-      <CreateDialog refreshKey={refreshKey} setRefreshKey={setRefreshKey}/>
-    </>
 
+      <CreateDialog refreshKey={refreshKey} setRefreshKey={setRefreshKey} />
+      <MoveDialog
+        isOpen={isMoveOpen}
+        onClose={() => setIsMoveOpen(false)}
+        entry={moveEntry}
+        onSave={handleMoveSubmit}
+      />
+    </>
   );
 }

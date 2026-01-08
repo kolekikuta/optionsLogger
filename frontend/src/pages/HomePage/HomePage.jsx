@@ -5,6 +5,7 @@ import CreateLog from '../../components/CreateLog/CreateLog';
 import { LogoutButton } from '@/components/LogoutButton';
 import PositionsTable from '@/components/PositionsTable/PositionsTable';
 import Charts from '@/components/Charts/Charts';
+import Header from '@/components/Header/Header';
 
 
 export default function HomePage() {
@@ -12,7 +13,6 @@ export default function HomePage() {
 
     return (
         <>
-            <LogoutButton />
             <PanelGroup direction="vertical" style={{ width: '100vw', height: '100vh' }}>
                 <Panel defaultSize={50}>
                     <PanelGroup direction="horizontal">

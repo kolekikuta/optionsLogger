@@ -6,8 +6,8 @@ import datetime
 
 from database import db
 from routes.positions_routes import positions_blueprint
-#from routes.users_routes import users_blueprint
 from routes.ticker_history_routes import ticker_history_blueprint
+from routes.folders_routes import folders_blueprint
 
 
 def create_app():
@@ -22,6 +22,7 @@ def create_app():
     app.register_blueprint(positions_blueprint, url_prefix="/api")
     # app.register_blueprint(users_blueprint, url_prefix="/api")
     app.register_blueprint(ticker_history_blueprint, url_prefix="/api")
+    app.register_blueprint(folders_blueprint, url_prefix="/api")
 
 
     return app

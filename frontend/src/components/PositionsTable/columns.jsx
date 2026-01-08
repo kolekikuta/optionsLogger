@@ -15,7 +15,7 @@ function formatCurrency(value) {
     }).format(Number(value));
 }
 
-export const positionsColumns = ({ onEdit, onDelete }) => [
+export const positionsColumns = ({ onEdit, onDelete, onMove }) => [
     {
         accessorKey: "id",
         enableSorting: false,
@@ -191,6 +191,7 @@ export const positionsColumns = ({ onEdit, onDelete }) => [
           entry={row.original}
           onEdit={onEdit}
           onDelete={onDelete}
+          onMove={onMove}
         />
 
     ),

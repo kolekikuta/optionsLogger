@@ -10,7 +10,7 @@ export default function ProgressBar({ entry, expiration, exit }) {
     if (exit) {
         return (
             <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                <div className="bg-grey-700 h-2 rounded-full w-full" />
+                <div className="bg-gradient-to-r from-gray-800 to-gray-700 h-2 rounded-full w-full" />
             </div>
         );
     }
