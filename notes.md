@@ -45,16 +45,28 @@
 
 ### Todo
 [ ] Home page
+    [ ] Loading screen while all data is fetched
     [ ] Chart
+        [ ] Change data based on which position is selected
+        [ ] Show entry and exit points
+        [ ] Fallback if no data
+        [ ] Title changes with data being displayed
     [x] Log Creator
         [x] writing to db
         [x] modal
     [ ] Position Logs
         [ ] pagination
+    [ ] Folder System
+        [x] Folder creation in sidebar
+        [ ] Folder Deletion/Modification
+        [x] Adding/Removing Positions to folders
+        [ ] Folder value/profit loss
+        [ ] Clicking folder modifies the positions shown in the table
+    [ ] Sidebar
+        [x] Home button does not refresh when on the home page, just closes sidebar
 [ ] Landing Page
 [x] Login Page
 [x] Sign Up Page
-[ ] Header (log out, home button)
 [ ] Profile page
 [ ] create profile email template
 

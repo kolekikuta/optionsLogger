@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import HomePage from './pages/HomePage/HomePage'
-import LandingPage from './pages/LandingPage/LandingPage'
+import LandingPage from './pages/LandingPage/LandingPage.jsx'
 import './App.css'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import Login from "@/app/routes/login";

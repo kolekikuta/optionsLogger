@@ -1,20 +1,18 @@
-import React from "react"
-import { Link } from "react-router-dom"
-import { Button } from '@/components/ui/button'
+import LandingHero from "./LandingHero"
+import LandingNav from "./LandingNav"
+import LandingFeatures from "./LandingFeatures"
+import LandingCTA from "./LandingCTA"
 
 export default function LandingPage() {
 
+    return (
+        <div>
+            <LandingNav/>
+            <LandingHero/>
+            <LandingFeatures/>
+            <LandingCTA/>
 
-    return(
-        <>
-            <h1>Landing Page</h1>
-            <Link to="/sign-up">
-                <Button>Sign Up</Button>
-            </Link>
-            <Link to="/login">
-                <Button>Login</Button>
-            </Link>
+        </div>
 
-        </>
     )
 }

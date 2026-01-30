@@ -10,6 +10,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Link, data, redirect, useFetcher, useSearchParams } from 'react-router';
+import { motion } from 'framer-motion';
 
 export const action = async ({
   request
@@ -44,7 +45,19 @@ export default function ForgotPassword() {
   const loading = fetcher.state === 'submitting'
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 relative">
+      <div className="absolute inset-0 w-full pointer-events-none">
+        <motion.div
+          className="absolute top-1/4 -left-20 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"
+          animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 -right-20 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl"
+          animate={{ x: [0, -50, 0], y: [0, -30, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           {success ? (

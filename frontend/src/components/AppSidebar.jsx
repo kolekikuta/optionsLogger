@@ -1,6 +1,6 @@
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarHeader, useSidebar } from "@/components/ui/sidebar"
 import { Folder, FolderOpen, Home, Settings, LogOut, CircleUserRound, Plus, FolderCog, Save } from "lucide-react"
-import { Form } from "react-router-dom"
+import { Form, useLocation } from "react-router-dom"
 import { useContext, useState } from "react"
 import { FoldersContext } from "@/layouts/DashboardLayout"
 import { Button } from "@/components/ui/button"
@@ -27,8 +27,17 @@ const pages = [
 
 export default function AppSidebar() {
     const {folders, setFolders} = useContext(FoldersContext);
+    const { setOpen } = useSidebar();
+    const location = useLocation();
     const [newFolderName, setNewFolderName] = useState("");
     const [isCreating, setIsCreating] = useState(false);
+
+    const handleHomeClick = (e) => {
+        if (location.pathname === "/dashboard") {
+            e.preventDefault();
+            setOpen(false);
+        }
+    };
 
     const toggleFolder = (id) => {
         setFolders((prev) =>
@@ -82,7 +91,7 @@ export default function AppSidebar() {
                             {pages.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild>
-                                        <a href={item.url} className="flex items-center gap-2">
+                                        <a href={item.url} onClick={item.title === "Home" ? handleHomeClick : undefined} className="flex items-center gap-2">
                                             {item.icon}
                                             {item.title}
                                         </a>
