@@ -29,12 +29,6 @@ export default function LandingNav() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             <a
-              href="#features"
-              className="text-gray-300 hover:text-emerald-400 transition-colors"
-            >
-              Features
-            </a>
-            <a
               href="#about"
               className="text-gray-300 hover:text-emerald-400 transition-colors"
             >
@@ -80,12 +74,6 @@ export default function LandingNav() {
             className="md:hidden py-4 border-t border-gray-800"
           >
             <div className="flex flex-col gap-4">
-              <a
-                href="#features"
-                className="text-gray-300 hover:text-emerald-400 transition-colors"
-              >
-                Features
-              </a>
               <a
                 href="#about"
                 className="text-gray-300 hover:text-emerald-400 transition-colors"

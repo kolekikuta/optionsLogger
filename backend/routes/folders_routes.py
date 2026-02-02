@@ -141,3 +141,24 @@ def remove_position_from_folder(folder_id):
     db.session.commit()
 
     return jsonify({"status": "position removed from folder"}), 200
+
+
+@folders_blueprint.route("/folders/positions", methods=["GET"])
+def get_folders_positions():
+    user_id = get_user_id_from_request()
+
+    rows = (
+        db.session.query(FolderPositions.folder_id, FolderPositions.position_id)
+        .join(Folders, Folders.id == FolderPositions.folder_id)
+        .filter(Folders.user_id == user_id)
+        .all()
+    )
+
+    result = {}
+    for folder_id, position_id in rows:
+        fid = str(folder_id)
+        if fid not in result:
+            result[fid] = []
+        result[fid].append(position_id)
+
+    return jsonify(result), 200

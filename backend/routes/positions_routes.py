@@ -125,24 +125,46 @@ def validate_ticker():
 @positions_blueprint.route("/positions", methods=["GET"])
 def get_positions():
     user_id = get_user_id_from_request()
-    positions = Positions.query.filter_by(user_id=user_id).all()
-    today = date.today()
+    folder_ids_param = request.args.get("folder_ids")
 
+    query = db.session.query(Positions).filter(Positions.user_id == user_id)
+
+    if folder_ids_param is not None:
+        # folder_ids was provided (even if empty)
+        if folder_ids_param.strip() == "":
+            # Explicitly no folders selected -> return no positions
+            return jsonify([])
+
+        try:
+            folder_ids = [x.strip() for x in folder_ids_param.split(",") if x.strip()]
+        except ValueError:
+            return jsonify({"error": "Invalid folder_ids parameter"}), 400
+
+        query = (
+            query
+            .join(FolderPositions, Positions.id == FolderPositions.position_id)
+            .filter(FolderPositions.folder_id.in_(folder_ids))
+            .distinct()
+        )
+
+    positions = query.all()
+    today = date.today()
     positions_list = []
+
     for pos in positions:
         expiration = None
         if pos.expiration_date:
-            if isinstance(pos.expiration_date, str):
-                expiration = date.fromisoformat(pos.expiration_date)
-            else:
-                expiration = pos.expiration_date
+            expiration = (
+                date.fromisoformat(pos.expiration_date)
+                if isinstance(pos.expiration_date, str)
+                else pos.expiration_date
+            )
 
-        if expiration and not pos.exit_date and expiration >= today:
-            dte = (expiration - today).days
-        else:
-            dte = None
-
-        entry_amount = f"{pos.quantity} @ ${pos.entry_premium:.2f}"
+        dte = (
+            (expiration - today).days
+            if expiration and not pos.exit_date and expiration >= today
+            else None
+        )
 
         positions_list.append({
             "id": pos.id,
@@ -159,11 +181,14 @@ def get_positions():
             "exit_price": pos.exit_price if pos.exit_price else None,
             "exit_premium": pos.exit_premium if pos.exit_premium else None,
             "profit_loss": pos.profit_loss,
-            "profit_loss_percent": pos.profit_loss_percent if pos.profit_loss_percent else None,
+            "profit_loss_percent": pos.profit_loss_percent,
             "dte": dte,
             "entry_total": pos.entry_premium * pos.quantity * 100,
-            "entry_amount": entry_amount,
-            "exit_total": (pos.exit_premium * pos.quantity * 100) if pos.exit_premium else None
+            "entry_amount": f"{pos.quantity} @ ${pos.entry_premium:.2f}",
+            "exit_total": (
+                pos.exit_premium * pos.quantity * 100
+                if pos.exit_premium else None
+            ),
         })
 
     return jsonify(positions_list)

@@ -2,10 +2,11 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGrou
 import { Folder, FolderOpen, Home, Settings, LogOut, CircleUserRound, Plus, FolderCog, Save } from "lucide-react"
 import { Form, useLocation } from "react-router-dom"
 import { useContext, useState } from "react"
-import { FoldersContext } from "@/layouts/DashboardLayout"
+import { FoldersContext, PositionsRefreshContext } from "@/layouts/DashboardLayout"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
 import { createClient } from "@/lib/client"
+import CreateDialog from "@/components/PositionsTable/CreateDialog"
 
 // pull folder names and values from backend
 // clicking on folder should change the positions shown in the main view
@@ -27,6 +28,7 @@ const pages = [
 
 export default function AppSidebar() {
     const {folders, setFolders} = useContext(FoldersContext);
+    const { refreshKey, setRefreshKey } = useContext(PositionsRefreshContext);
     const { setOpen } = useSidebar();
     const location = useLocation();
     const [newFolderName, setNewFolderName] = useState("");
@@ -42,10 +44,9 @@ export default function AppSidebar() {
     const toggleFolder = (id) => {
         setFolders((prev) =>
             prev.map((folder) =>
-                folder.name === id ? { ...folder, open: !folder.open } : folder
+                folder.id === id ? { ...folder, open: !folder.open } : folder
             )
         );
-
     }
 
     async function handleCreateFolder(e) {
@@ -98,6 +99,28 @@ export default function AppSidebar() {
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}
+
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+                <SidebarGroup>
+                    <SidebarGroupLabel>Positions</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <CreateDialog
+                                    refreshKey={refreshKey}
+                                    setRefreshKey={setRefreshKey}
+                                    trigger={
+                                        <SidebarMenuButton>
+                                            <span className="flex items-center gap-2">
+                                                <Plus size={16} />
+                                                Create New Position
+                                            </span>
+                                        </SidebarMenuButton>
+                                    }
+                                />
+                            </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -106,8 +129,8 @@ export default function AppSidebar() {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {folders.map((folder) => (
-                                <SidebarMenuItem key={folder.name}>
-                                    <SidebarMenuButton onClick={() => toggleFolder(folder.name)} className="flex items-center gap-2">
+                                <SidebarMenuItem key={folder.id}>
+                                    <SidebarMenuButton onClick={() => toggleFolder(folder.id)} className="flex items-center gap-2">
                                         {folder.open ? <FolderOpen size={16} /> : <Folder size={16} />}
                                         {folder.name}
                                     </SidebarMenuButton>

@@ -44,7 +44,7 @@ import { getEntryDisabledRange, getExitDisabledRange } from '@/utils/datepicker'
 
 //EditDialog.whyDidYouRender = true
 
-export default function CreateDialog({ refreshKey, setRefreshKey }) {
+export default function CreateDialog({ refreshKey, setRefreshKey, trigger = null }) {
 
     const [log, setLog] = useState({
         ticker: undefined,
@@ -221,12 +221,16 @@ export default function CreateDialog({ refreshKey, setRefreshKey }) {
                 </AlertDialog>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        className="text-white"
-                    >
-                        <Plus />
-                    </Button>
+                    {trigger ? (
+                        trigger
+                    ) : (
+                        <Button
+                            variant="ghost"
+                            className="text-white"
+                        >
+                            <Plus />
+                        </Button>
+                    )}
 
                 </DialogTrigger>
 

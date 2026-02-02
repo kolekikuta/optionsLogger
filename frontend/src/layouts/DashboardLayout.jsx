@@ -7,9 +7,11 @@ import AppSidebar from "@/components/AppSidebar"
 import { createClient } from "@/lib/client"
 
 export const FoldersContext = React.createContext(null);
+export const PositionsRefreshContext = React.createContext(null);
 
 export default function DashboardLayout() {
   const [folders, setFolders] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     async function fetchFolders() {
@@ -22,7 +24,7 @@ export default function DashboardLayout() {
       const res = await axios.get(`${backendUrl}/api/folders`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
-      setFolders(res.data);
+      setFolders(res.data.map(f => ({ ...f, open: false })));
     }
     fetchFolders();
   }, []);
@@ -31,15 +33,17 @@ export default function DashboardLayout() {
   return (
     <>
       <FoldersContext.Provider value={{ folders, setFolders }}>
-        <AppSidebar />
-        <SidebarInset>
-          <header className="flex h-14 items-center gap-2 px-4">
-            <SidebarTrigger />
-          </header>
-          <main>
-            <Outlet />
-          </main>
-        </SidebarInset>
+        <PositionsRefreshContext.Provider value={{ refreshKey, setRefreshKey }}>
+          <AppSidebar />
+          <SidebarInset>
+            <header className="flex h-14 items-center gap-2 px-4">
+              <SidebarTrigger />
+            </header>
+            <main>
+              <Outlet />
+            </main>
+          </SidebarInset>
+        </PositionsRefreshContext.Provider>
       </FoldersContext.Provider>
     </>
   )

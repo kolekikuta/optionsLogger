@@ -61,10 +61,11 @@
         [ ] Folder Deletion/Modification
         [x] Adding/Removing Positions to folders
         [ ] Folder value/profit loss
-        [ ] Clicking folder modifies the positions shown in the table
+        [x] Clicking folder modifies the positions shown in the table
     [ ] Sidebar
         [x] Home button does not refresh when on the home page, just closes sidebar
 [ ] Landing Page
+    [ ] Demo page
 [x] Login Page
 [x] Sign Up Page
 [ ] Profile page
