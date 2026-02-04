@@ -14,30 +14,10 @@ export default function HomePage() {
 
     return (
         <>
-            <PanelGroup direction="vertical" style={{ width: '100vw', height: '100vh' }}>
-                <Panel defaultSize={50}>
-                    <PanelGroup direction="horizontal">
-                        <Panel defaultSize={70} className="panel">
-                            <div className="panel-container">
-                                <Charts />
-                            </div>
-                        </Panel>
-                        <PanelResizeHandle />
-                        <Panel defaultSize={30} className="panel">
-                            <div className="panel-container">
-                                <h1>?</h1>
-                            </div>
-                        </Panel>
-                    </PanelGroup>
-                </Panel>
-                <PanelResizeHandle />
-                <Panel defaultSize={50} className="panel">
-                    <div className="panel-container">
-                        <PositionsTable refreshKey={refreshKey} setRefreshKey={setRefreshKey}/>
-                    </div>
-                </Panel>
-
-            </PanelGroup>
+            <div className="px-8">
+            <Charts />
+            <PositionsTable refreshKey={refreshKey} setRefreshKey={setRefreshKey}/>
+            </div>
         </>
     )
 }

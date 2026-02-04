@@ -6,6 +6,10 @@ import yfinance as yf
 from .utils_auth import get_user_id_from_request
 from models.folder_positions import FolderPositions
 from models.folders import Folders
+from models.ticker_history import Ticker_History
+from ticker import download_ticker
+import pandas as pd
+from datetime import timedelta
 
 positions_blueprint = Blueprint("positions", __name__)
 
@@ -148,6 +152,96 @@ def get_positions():
         )
 
     positions = query.all()
+
+    # --- Ensure ticker history up-to-date for tickers present in positions ---
+    try:
+
+
+        tickers = set([p.ticker.upper() for p in positions if p.ticker])
+        today = date.today()
+
+        for ticker in tickers:
+            # get latest stored date for this ticker
+            latest = (
+                Ticker_History.query
+                .filter_by(ticker=ticker)
+                .order_by(Ticker_History.date.desc())
+                .first()
+            )
+
+            if latest is None:
+                # no data present -- fetch last year
+                start_date = today - timedelta(days=365)
+            else:
+                if latest.date >= today:
+                    # up-to-date
+                    continue
+                start_date = latest.date + timedelta(days=1)
+
+            end_date = today + timedelta(days=1)  # yfinance end is exclusive
+
+            try:
+                df = download_ticker(ticker, start_date.isoformat(), end_date.isoformat())
+            except Exception as e:
+                print(f"Error downloading history for {ticker}: {e}")
+                continue
+
+            if df is None or df.empty:
+                continue
+
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+
+            df = df.reset_index()
+
+            rows = []
+            for row in df.itertuples(index=False):
+                # handle different column names
+                date_val = None
+                if hasattr(row, 'Date'):
+                    date_val = row.Date.date()
+                elif hasattr(row, 'index'):
+                    # sometimes the index name is 'index' or 'date'
+                    date_val = row.index.date()
+                else:
+                    # try first field
+                    date_field = getattr(row, df.columns[0], None)
+                    if hasattr(date_field, 'date'):
+                        date_val = date_field.date()
+
+                if date_val is None:
+                    continue
+
+                open_v = getattr(row, 'Open', None)
+                high_v = getattr(row, 'High', None)
+                low_v = getattr(row, 'Low', None)
+                close_v = getattr(row, 'Close', None)
+                vol_v = getattr(row, 'Volume', None)
+
+                rows.append(
+                    Ticker_History(
+                        ticker=ticker,
+                        date=date_val,
+                        open=open_v,
+                        high=high_v,
+                        low=low_v,
+                        close=close_v,
+                        volume=int(vol_v) if vol_v is not None else None,
+                    )
+                )
+
+            if rows:
+                try:
+                    db.session.bulk_save_objects(rows)
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"Error saving ticker history for {ticker}: {e}")
+    except Exception as e:
+        # If anything goes wrong during update, log and continue returning positions
+        print(f"Ticker history update failed: {e}")
+
+    # --- Build response ---
     today = date.today()
     positions_list = []
 

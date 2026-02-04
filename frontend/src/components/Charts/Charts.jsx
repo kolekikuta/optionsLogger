@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { createClient } from '@/lib/client';
 import { getCached } from '@/lib/cache'
-import { TrendingUp } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
+import { SelectedTickerContext } from '@/layouts/DashboardLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   ChartContainer,
@@ -20,6 +20,7 @@ export default function Charts() {
     const [timeframe, setTimeframe] = useState("ALL");
 
     const [data, setData] = useState([]);
+    const { selectedTicker } = useContext(SelectedTickerContext);
 
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -36,13 +37,14 @@ export default function Charts() {
         if (!session) return;
         const fetchData = async () => {
             const { start, end } = getDateRange(timeframe);
-            const key = `ticker-history:SPY:${start}:${end}`
+            const symbol = selectedTicker || "SPY";
+            const key = `ticker-history:${symbol}:${start}:${end}`
 
             const rows = await getCached(
                 key,
                 async () => {
                     const response = await axios.get(`${backendUrl}/api/ticker/history`, {
-                        params: { symbol: "SPY", start, end },
+                        params: { symbol, start, end },
                         headers: { Authorization: `Bearer ${session.access_token}` },
                     })
                     return response.data.map(row => ({ date: row.date, close: row.close }))
@@ -50,10 +52,17 @@ export default function Charts() {
                 5 * 60 * 1000 // 5 minutes
             )
 
-            setData(rows)
+            // For the "ALL" timeframe, reduce the number of plotted points to improve readability
+            // Show every 20th datapoint and always include the last datapoint
+            const displayedRows = timeframe === "ALL"
+                ? rows.filter((_, i) => i % 20 === 0 || i === rows.length - 1)
+                : rows
+
+            setData(displayedRows)
         }
         fetchData()
-    }, [session, timeframe]);
+    }, [session, timeframe, selectedTicker]);
+
 
     const chartConfig = {
         close : {
@@ -102,11 +111,11 @@ export default function Charts() {
 
 
     return (
-        <Card className="w-full">
+        <Card className="w-full bg-black/5 mb-8">
             <CardHeader>
                 <div className="flex justify-between">
                     <div>
-                        <CardTitle>Line Chart - Linear</CardTitle>
+                        <CardTitle>{selectedTicker || "SPY"}</CardTitle>
                     </div>
                     <div>
                         {timeframes.map(tf => (
@@ -129,7 +138,7 @@ export default function Charts() {
             <CardContent>
                 <ChartContainer config={chartConfig} className="h-[300px] w-full">
                 <LineChart
-                    key={timeframe}
+                    key={`${timeframe}-${selectedTicker || 'SPY'}`}
                     accessibilityLayer
                     data={data}
                     margin={{
@@ -143,13 +152,11 @@ export default function Charts() {
                         tickLine={false}
                         axisLine={false}
                         tickMargin={8}
-                        isAnimationActive={false}
                     />
                     <YAxis
                         domain={["auto", "auto"]}
                         tickLine={false}
                         axisLine={false}
-                        isAnimationActive={false}
                     />
                     <ChartTooltip
                         cursor={false}
@@ -161,7 +168,6 @@ export default function Charts() {
                         stroke="var(--color-close)"
                         strokeWidth={2}
                         dot={false}
-                        isAnimationActive={false}
                     />
                 </LineChart>
                 </ChartContainer>

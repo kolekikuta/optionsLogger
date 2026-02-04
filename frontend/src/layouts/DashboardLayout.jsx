@@ -8,10 +8,12 @@ import { createClient } from "@/lib/client"
 
 export const FoldersContext = React.createContext(null);
 export const PositionsRefreshContext = React.createContext(null);
+export const SelectedTickerContext = React.createContext(null);
 
 export default function DashboardLayout() {
   const [folders, setFolders] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedTicker, setSelectedTicker] = useState(null);
 
   useEffect(() => {
     async function fetchFolders() {
@@ -33,17 +35,19 @@ export default function DashboardLayout() {
   return (
     <>
       <FoldersContext.Provider value={{ folders, setFolders }}>
-        <PositionsRefreshContext.Provider value={{ refreshKey, setRefreshKey }}>
-          <AppSidebar />
-          <SidebarInset>
-            <header className="flex h-14 items-center gap-2 px-4">
-              <SidebarTrigger />
-            </header>
-            <main>
-              <Outlet />
-            </main>
-          </SidebarInset>
-        </PositionsRefreshContext.Provider>
+        <SelectedTickerContext.Provider value={{ selectedTicker, setSelectedTicker }}>
+          <PositionsRefreshContext.Provider value={{ refreshKey, setRefreshKey }}>
+            <AppSidebar />
+            <SidebarInset>
+              <header className="flex h-14 items-center gap-2 px-4">
+                <SidebarTrigger />
+              </header>
+              <main>
+                <Outlet />
+              </main>
+            </SidebarInset>
+          </PositionsRefreshContext.Provider>
+        </SelectedTickerContext.Provider>
       </FoldersContext.Provider>
     </>
   )

@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from database import db
 from models.ticker_history import Ticker_History
-from datetime import date
 import yfinance as yf
 import pandas as pd
 

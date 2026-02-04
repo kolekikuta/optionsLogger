@@ -8,7 +8,7 @@ import React, {
   useRef,
 } from "react";
 import { createClient } from "@/lib/client";
-import { FoldersContext } from "@/layouts/DashboardLayout";
+import { FoldersContext, SelectedTickerContext } from "@/layouts/DashboardLayout";
 import {
   flexRender,
   getCoreRowModel,
@@ -47,6 +47,24 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
   /* ---------------- Context ---------------- */
 
   const { folders } = useContext(FoldersContext);
+  const { selectedTicker, setSelectedTicker } = useContext(SelectedTickerContext);
+  const [selectedRowId, setSelectedRowId] = useState(null);
+
+  const handleRowClick = useCallback((entry) => {
+    const id = String(entry.id);
+    setSelectedRowId(prev => {
+      if (prev === id) {
+        if (setSelectedTicker) setSelectedTicker(null);
+        return null;
+      }
+      if (setSelectedTicker) setSelectedTicker(entry.ticker);
+      return id;
+    });
+  }, [setSelectedTicker]);
+
+  /* ---------------- Internal Render Signal ---------------- */
+
+  const [dataVersion, setDataVersion] = useState(0);
 
   /* ---------------- Caches (NO STATE) ---------------- */
 
@@ -75,12 +93,14 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
         positionsCacheRef.current = posRes.data || [];
         folderPositionsMapRef.current = folderPosRes.data || {};
 
-        // precompute Sets for fast lookup
         const setMap = {};
         for (const [fid, pids] of Object.entries(folderPositionsMapRef.current)) {
           setMap[fid] = new Set(pids.map(String));
         }
         folderPositionSetRef.current = setMap;
+
+        // force recompute of derived data
+        setDataVersion(v => v + 1);
       } catch (err) {
         console.error("Error fetching positions:", err);
       }
@@ -92,26 +112,37 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
     };
   }, [session, refreshKey]);
 
-  /* ---------------- Derived Positions (FAST) ---------------- */
+  /* ---------------- Derived Positions ---------------- */
 
   const positions = useMemo(() => {
     const all = positionsCacheRef.current;
     if (!all.length) return [];
 
-    const openFolderIds = folders.filter(f => f.open).map(f => String(f.id));
+    const openFolderIds = folders
+      .filter(f => f.open)
+      .map(f => String(f.id));
+
+    // no folders open → show everything
     if (openFolderIds.length === 0) return all;
 
     const visibleIds = new Set();
-    openFolderIds.forEach(fid => {
+    for (const fid of openFolderIds) {
       const set = folderPositionSetRef.current[fid];
-      if (!set) return;
+      if (!set) continue;
       set.forEach(id => visibleIds.add(id));
-    });
+    }
 
-    console.log("Visible IDs:", visibleIds);
+    return all.filter(p => visibleIds.has(String(p.id)));
+  }, [folders, refreshKey, dataVersion]);
 
-    return all.filter(p => visibleIds.has(p.id));
-  }, [folders, refreshKey]);
+  useEffect(() => {
+    if (!selectedRowId) return;
+    const exists = positions.some(p => String(p.id) === selectedRowId);
+    if (!exists) {
+      setSelectedRowId(null);
+      if (setSelectedTicker) setSelectedTicker(null);
+    }
+  }, [positions, selectedRowId, setSelectedTicker]);
 
   /* ---------------- Table State ---------------- */
 
@@ -216,18 +247,26 @@ export default function PositionsTable({ refreshKey, setRefreshKey }) {
 
           <TableBody>
             {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map(row => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map(row => {
+                const isSelected = String(row.id) === selectedRowId;
+                return (
+                  <TableRow
+                    key={row.id}
+                    className={`${isSelected ? 'bg-zinc-900' : 'hover:bg-zinc-900'} cursor-pointer`}
+                    onClick={() => handleRowClick(row.original)}
+                    aria-selected={isSelected}
+                  >
+                    {row.getVisibleCells().map(cell => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
